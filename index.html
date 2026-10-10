@@ -1,0 +1,1654 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STRIKE · Football Turf, Khulna</title>
+<meta name="description" content="STRIKE — floodlit football turf at JoyBangla Mor, Khulna. Walk in, pick your 90 minutes, take your shot.">
+<meta name="theme-color" content="#050806">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23050806'/%3E%3Ctext x='32' y='46' font-family='Impact,sans-serif' font-size='40' text-anchor='middle' fill='%23d4ff3a'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Hind+Siliguri:wght@400;600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<style>
+:root{
+  --ink:#050806; --ink2:#0b120d; --glass:rgba(7,12,9,.74); --line:rgba(243,241,232,.12); --line2:rgba(243,241,232,.22);
+  --chalk:#f3f1e8; --mute:rgba(243,241,232,.66); --dim:rgba(243,241,232,.42);
+  --lime:#d4ff3a; --flare:#ff5a1f; --kit:#d4ff3a;
+  --display:"Big Shoulders Display", Impact, "Arial Narrow", sans-serif;
+  --sans:"Instrument Sans", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  --bn:"Hind Siliguri", sans-serif;
+  --ease:cubic-bezier(.77,0,.18,1); --out:cubic-bezier(.16,1,.3,1); --spring:cubic-bezier(.34,1.56,.64,1);
+  --top:68px; --tick:38px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--ink);color:var(--chalk);font-family:var(--sans);font-size:15px;line-height:1.5;overflow:hidden;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+button,input{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--lime);color:var(--ink)}
+:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+.mono{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.bn{font-family:var(--bn);font-weight:600}
+svg{display:block}
+
+/* ---------- scene ---------- */
+#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:pan-y}
+body.no-gl #scene{display:none}
+body.no-gl{background:radial-gradient(80% 60% at 70% 40%,#123d22,transparent 60%),radial-gradient(60% 50% at 20% 90%,#0d2a17,transparent),var(--ink)}
+.shade{position:fixed;inset:0;pointer-events:none;z-index:1;
+  background:radial-gradient(120% 90% at 60% 45%,transparent 50%,rgba(3,5,4,.55) 100%),linear-gradient(180deg,rgba(3,5,4,.65),transparent 14%,transparent 72%,rgba(3,5,4,.75))}
+body.desk-on .shade{background:radial-gradient(120% 90% at 65% 45%,transparent 45%,rgba(3,5,4,.55) 100%),linear-gradient(90deg,rgba(3,5,4,.6),transparent 38%),linear-gradient(180deg,rgba(3,5,4,.65),transparent 14%,transparent 82%,rgba(3,5,4,.7))}
+.flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:60}
+
+/* ---------- boot ---------- */
+.boot{position:fixed;inset:0;z-index:100;background:#020302;display:grid;place-content:center;justify-items:center;gap:16px;transition:opacity .8s var(--ease),visibility .8s}
+.boot.gone{opacity:0;visibility:hidden}
+.boot b{font:900 54px/1 var(--display);letter-spacing:.06em;color:#1c2416}
+.boot i{width:180px;height:2px;background:var(--line);overflow:hidden;position:relative}
+.boot i::after{content:"";position:absolute;inset:0;background:var(--lime);transform-origin:left;animation:bootbar 1.4s var(--ease) infinite}
+@keyframes bootbar{0%{transform:scaleX(0)}60%{transform:scaleX(1)}100%{transform:scaleX(1);opacity:0}}
+.boot span{color:var(--dim)}
+
+/* ---------- top bar ---------- */
+.top{position:fixed;inset:0 0 auto;height:var(--top);z-index:30;display:flex;align-items:center;gap:20px;padding:0 22px}
+.logo{display:flex;align-items:center;gap:10px;font:900 30px/1 var(--display);letter-spacing:.04em;flex:0 0 auto}
+.logo i{width:13px;height:13px;border-radius:50%;background:var(--lime);box-shadow:0 0 14px var(--lime)}
+.logo span{transform:skewX(-9deg);display:inline-block}
+.rail{position:relative;flex:1;max-width:780px;margin:0 auto;display:flex;justify-content:space-between;padding-top:4px}
+.rail-track{position:absolute;left:14px;right:14px;top:13px;height:2px;background:var(--line2);border-radius:2px}
+.rail-fill{position:absolute;inset:0;background:var(--kit);transform-origin:left;transform:scaleX(0);transition:transform .9s var(--out),background .4s;box-shadow:0 0 10px var(--kit)}
+.rail-ball{position:absolute;top:-7px;left:0;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#d9d9d0 60%,#9a9a90);box-shadow:0 0 0 2px var(--ink),0 2px 10px rgba(0,0,0,.6);transition:left .9s var(--out)}
+.rail-ball::after{content:"";position:absolute;inset:4px;background:#111;clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%);opacity:.85}
+.rn{position:relative;z-index:1;display:grid;justify-items:center;gap:3px;min-width:0;width:16.6%;padding:0 2px}
+.rn .d{width:10px;height:10px;border-radius:50%;background:var(--ink);border:1.5px solid var(--line2);margin-top:8px;transition:.3s}
+.rn .l{font:600 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);transition:color .3s}
+.rn .v{font:600 12px var(--sans);color:var(--chalk);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:17px}
+.rn.done .d{background:var(--kit);border-color:var(--kit)}
+.rn.cur .d{border-color:var(--kit);box-shadow:0 0 0 4px rgba(212,255,58,.15)}
+.rn.cur .l{color:var(--kit)}
+.rn:disabled{cursor:default}
+.rn:not(:disabled):hover .l{color:var(--chalk)}
+.top-r{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.chip{display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line2);background:rgba(5,8,6,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);white-space:nowrap}
+.chip .rec{width:7px;height:7px;border-radius:50%;background:#ff3b30;box-shadow:0 0 10px #ff3b30;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+.chip svg{width:16px;height:16px}
+.icb{width:36px;padding:0;justify-content:center;transition:background .2s,color .2s}
+.icb:hover,.icb[aria-pressed="true"]{background:var(--chalk);color:var(--ink)}
+.cur-l{display:none}
+
+/* ---------- gate ---------- */
+.gate{position:fixed;left:0;right:0;bottom:var(--tick);top:var(--top);z-index:10;display:flex;flex-direction:column;justify-content:flex-end;padding:0 clamp(18px,5vw,72px) clamp(22px,5vh,56px);pointer-events:none;transition:opacity .7s var(--ease),transform .9s var(--ease)}
+.gate>*{pointer-events:auto}
+.gate.hidden{opacity:0;transform:translateY(30px);pointer-events:none}
+.gate.hidden>*{pointer-events:none}
+.g-kick{display:flex;gap:10px;align-items:center;color:var(--mute)}
+.g-kick i{width:26px;height:1px;background:var(--lime)}
+.neon{font:900 clamp(92px,16vw,250px)/.82 var(--display);letter-spacing:.03em;color:#f6ffe0;margin:10px 0 4px;
+  text-shadow:0 0 4px #fff,0 0 16px var(--lime),0 0 38px var(--lime),0 0 90px rgba(212,255,58,.55)}
+.neon span{display:inline-block;opacity:.07;animation:neonOn 1.5s steps(1) forwards;animation-delay:calc(.5s + var(--i)*.13s)}
+.neon span:nth-child(5){animation:neonOn 1.5s steps(1) forwards 1.1s,buzz 9s 4s infinite}
+@keyframes neonOn{0%{opacity:.07}12%{opacity:1}18%{opacity:.12}30%{opacity:1}36%{opacity:.3}46%,100%{opacity:1}}
+@keyframes buzz{0%,93%,100%{opacity:1}94%{opacity:.25}96%{opacity:1}97%{opacity:.4}}
+.g-bn{font-size:clamp(18px,2vw,26px);color:var(--chalk)}
+.greet{max-width:560px;color:var(--mute);font-size:clamp(15px,1.3vw,18px);margin-top:12px;min-height:3.2em}
+.greet::after{content:"▍";color:var(--lime);animation:blink 1s infinite;margin-left:2px}
+.greet.done::after{display:none}
+.g-row{display:flex;gap:16px;align-items:stretch;margin-top:24px;flex-wrap:wrap}
+.now{border:1px solid var(--line2);border-radius:18px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:14px 16px;display:grid;grid-template-columns:auto auto;gap:10px 26px;min-width:300px}
+.now .mono{color:var(--dim);grid-column:1/-1;display:flex;align-items:center;gap:8px}
+.now .mono .rec{width:7px;height:7px;border-radius:50%;background:#ff3b30;animation:blink 1.4s infinite}
+.now div b{display:block;font:800 26px/1 var(--display);text-transform:uppercase}
+.now div span{font-size:12px;color:var(--mute)}
+.mine{border-color:var(--kit);background:linear-gradient(140deg,rgba(212,255,58,.12),var(--glass) 60%)}
+.g-btns{display:flex;flex-direction:column;gap:8px;justify-content:flex-end}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:48px;padding:0 22px;border-radius:999px;font:600 15px var(--sans);white-space:nowrap;transition:transform .35s var(--spring),background .2s,color .2s,box-shadow .3s,opacity .2s}
+.btn-k{background:var(--kit);color:var(--ink)}
+.btn-k:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 30px -10px var(--kit)}
+.btn-k:disabled{opacity:.28;cursor:not-allowed}
+.btn-g{border:1px solid var(--line2);background:rgba(5,8,6,.4)}
+.btn-g:hover{background:var(--chalk);color:var(--ink)}
+.btn-big{height:60px;font-size:17px;padding:0 30px}
+.btn .arr{transition:transform .35s var(--spring)}
+.btn:hover .arr{transform:translateX(4px)}
+.g-links{display:flex;gap:8px}
+.g-links .btn{height:40px;font-size:13px;padding:0 16px;flex:1}
+
+/* ---------- desk ---------- */
+.desk{position:fixed;z-index:20;left:20px;top:calc(var(--top) + 14px);bottom:calc(var(--tick) + 18px);width:430px;display:flex;flex-direction:column;
+  background:var(--glass);backdrop-filter:blur(20px) saturate(1.2);-webkit-backdrop-filter:blur(20px) saturate(1.2);border:1px solid var(--line2);border-radius:26px;overflow:hidden;
+  transition:opacity .6s var(--ease),transform .8s var(--out)}
+.desk::before{content:"";position:absolute;left:24px;right:24px;top:0;height:2px;background:var(--kit);box-shadow:0 0 18px var(--kit);border-radius:2px;transition:background .4s}
+.desk.hidden{opacity:0;transform:translateX(-40px);pointer-events:none}
+.desk-h{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--line);color:var(--dim)}
+.desk-h b{color:var(--kit);font-weight:600}
+.desk-b{flex:1;overflow-y:auto;padding:22px 22px 26px;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.desk-b.in>*{animation:rise .7s var(--out) both}
+.desk-b.in>*:nth-child(2){animation-delay:.05s}.desk-b.in>*:nth-child(3){animation-delay:.1s}.desk-b.in>*:nth-child(4){animation-delay:.15s}.desk-b.in>*:nth-child(n+5){animation-delay:.2s}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.desk-f{display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--line)}
+.desk-f .btn{height:50px}
+.desk-f #next{flex:1}
+.q{font:900 clamp(40px,3.6vw,54px)/.88 var(--display);text-transform:uppercase;margin:8px 0 6px}
+.q-n{color:var(--kit)}
+.q-bn{color:var(--mute);font-size:17px}
+.hint{color:var(--dim);font-size:13px;margin:10px 0 18px}
+.hint b{color:var(--chalk);font-weight:600}
+
+/* day */
+.dates{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.dt{position:relative;border:1px solid var(--line2);border-radius:14px;padding:10px 6px 8px;display:grid;justify-items:center;gap:1px;transition:transform .3s var(--spring),background .2s,border-color .2s}
+.dt:hover:not(:disabled){transform:translateY(-2px);border-color:var(--chalk)}
+.dt .w{font:600 10px var(--mono);letter-spacing:.1em;color:var(--mute)}
+.dt b{font:800 32px/1 var(--display)}
+.dt .m{font:600 9px var(--mono);letter-spacing:.12em;color:var(--dim)}
+.dt .x{display:flex;align-items:center;gap:3px;font:500 10px var(--mono);color:var(--mute);margin-top:3px;min-height:14px}
+.dt .x svg{width:13px;height:13px}
+.dt .bar{width:70%;height:3px;border-radius:2px;background:var(--line);margin-top:4px;overflow:hidden}
+.dt .bar i{display:block;height:100%;background:var(--kit)}
+.dt .wk{position:absolute;top:7px;right:7px;width:5px;height:5px;border-radius:50%;background:var(--flare)}
+.dt.sel{background:var(--chalk);color:var(--ink);border-color:var(--chalk)}
+.dt.sel .w,.dt.sel .m,.dt.sel .x{color:rgba(5,8,6,.6)}
+.dt.sel .bar{background:rgba(5,8,6,.15)}.dt.sel .bar i{background:var(--ink)}
+.dt:disabled{opacity:.3;cursor:not-allowed}
+
+/* time */
+.tg{margin-bottom:16px}
+.tg-h{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--mute)}
+.tg-h i{width:8px;height:8px;border-radius:50%}
+.tg-h span:last-child{margin-left:auto;color:var(--chalk);font-weight:600}
+.tcs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tc{border:1px solid var(--line2);border-radius:12px;padding:10px 6px;display:grid;justify-items:center;gap:2px;transition:transform .3s var(--spring),background .2s,border-color .2s}
+.tc b{font:800 26px/1 var(--display);font-variant-numeric:tabular-nums}
+.tc span{font:600 9px var(--mono);letter-spacing:.08em;color:var(--dim);white-space:nowrap}
+.tc.open:hover{transform:translateY(-2px);border-color:var(--kit)}
+.tc.open span{color:var(--mute)}
+.tc.taken,.tc.past,.tc.live,.tc.mine{cursor:not-allowed}
+.tc.taken b,.tc.past b{opacity:.3;text-decoration:line-through;text-decoration-thickness:2px}
+.tc.live{border-color:rgba(255,90,31,.5)}.tc.live span{color:var(--flare)}
+.tc.mine{border-color:var(--kit)}.tc.mine span{color:var(--kit)}
+.tc.sel{background:var(--kit);border-color:var(--kit);color:var(--ink)}
+.tc.sel span{color:rgba(5,8,6,.7)}
+.fc{display:flex;align-items:center;gap:12px;border:1px dashed var(--line2);border-radius:14px;padding:12px 14px;margin-top:4px;color:var(--mute);font-size:13px}
+.fc svg{width:28px;height:28px;flex:0 0 auto;color:var(--chalk)}
+.fc b{color:var(--chalk);font-weight:600}
+
+/* squad */
+.sqs{display:grid;gap:10px}
+.sq{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:center;border:1px solid var(--line2);border-radius:16px;padding:12px;text-align:left;transition:transform .3s var(--spring),border-color .2s,background .2s}
+.sq:hover{transform:translateX(4px);border-color:var(--chalk)}
+.sq svg{width:120px;height:76px}
+.sq b{font:900 44px/.9 var(--display);display:block}
+.sq span{color:var(--mute);font-size:13px}
+.sq.sel{border-color:var(--kit);background:linear-gradient(120deg,rgba(212,255,58,.14),transparent 70%)}
+.sq.sel b{color:var(--kit)}
+
+/* team */
+.f{display:grid;gap:6px;margin-bottom:18px}
+.f>label,.f>.mono{color:var(--dim)}
+.f input{background:transparent;border:0;border-bottom:1.5px solid var(--line2);padding:6px 0 10px;outline:none;border-radius:0;transition:border-color .2s;width:100%}
+.f input:focus{border-color:var(--kit)}
+.f input::placeholder{color:rgba(243,241,232,.25)}
+.f.big input{font:800 38px/1.1 var(--display);text-transform:uppercase}
+.f.mid input{font-size:18px}
+.f .err{color:var(--flare);font:500 11px var(--mono);min-height:14px}
+.f.bad input{border-color:var(--flare)}
+.dice{justify-self:start;display:inline-flex;align-items:center;gap:8px;color:var(--mute);font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:6px 0}
+.dice:hover{color:var(--kit)}
+.dice svg{width:16px;height:16px}
+.kits{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.kit{display:grid;justify-items:center;gap:6px;font:600 10px var(--mono);letter-spacing:.06em;color:var(--dim);text-transform:uppercase}
+.kit i{width:44px;height:44px;border-radius:50%;background:var(--c);border:3px solid var(--ink);box-shadow:0 0 0 1.5px var(--line2);transition:transform .3s var(--spring),box-shadow .2s}
+.kit:hover i{transform:scale(1.08)}
+.kit.sel i{box-shadow:0 0 0 2px var(--c),0 0 22px var(--c);transform:scale(1.1)}
+.kit.sel{color:var(--chalk)}
+
+/* confirm */
+.ledger{border:1px solid var(--line2);border-radius:16px;padding:6px 16px;margin:4px 0 18px;background:rgba(3,5,4,.35)}
+.ledger div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.ledger div:last-child{border-bottom:0}
+.ledger span{color:var(--dim);font:600 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;align-self:center}
+.ledger b{font-weight:600;text-align:right}
+.ledger .tot b{font:800 24px/1 var(--display)}
+.ledger .adv b{color:var(--kit)}
+.hold{position:relative;flex:1;height:50px;border-radius:999px;overflow:hidden;border:1.5px solid var(--kit);background:rgba(3,5,4,.5);display:grid;place-items:center;user-select:none;-webkit-user-select:none;touch-action:none;transition:transform .2s}
+.hold:active{transform:scale(.98)}
+.hold i{position:absolute;inset:0;background:var(--kit);transform-origin:left;transform:scaleX(var(--p,0))}
+.hold span{position:relative;font:900 22px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;mix-blend-mode:difference;color:#fff}
+.hold.shake{animation:shk .35s}
+@keyframes shk{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.fine{color:var(--dim);font-size:12px;text-align:center;margin-top:10px}
+
+/* ---------- ticker ---------- */
+.ticker{position:fixed;left:0;right:0;bottom:0;height:var(--tick);z-index:30;background:rgba(3,5,4,.88);border-top:1px solid var(--line);display:flex;align-items:center;overflow:hidden}
+.t-live{flex:0 0 auto;height:100%;display:flex;align-items:center;gap:8px;padding:0 14px;background:var(--flare);color:var(--ink);font:700 11px var(--mono);letter-spacing:.14em}
+.t-live i{width:7px;height:7px;border-radius:50%;background:var(--ink);animation:blink 1s infinite}
+.t-wrap{flex:1;overflow:hidden;mask:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);-webkit-mask:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+.t-track{display:flex;width:max-content;animation:tk 70s linear infinite}
+.ticker:hover .t-track{animation-play-state:paused}
+@keyframes tk{to{transform:translateX(-50%)}}
+.t-track span{font:500 12px var(--mono);letter-spacing:.06em;color:var(--mute);padding:0 22px;white-space:nowrap;display:flex;align-items:center;gap:22px}
+.t-track span::after{content:"◆";font-size:8px;color:var(--kit)}
+.t-track b{color:var(--chalk);font-weight:600}
+
+/* ---------- drawer ---------- */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(2,3,2,.6);opacity:0;pointer-events:none;transition:opacity .4s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;z-index:41;top:0;right:0;bottom:0;width:min(520px,100vw);background:var(--ink2);border-left:1px solid var(--line2);transform:translateX(100%);transition:transform .6s var(--out);display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.dr-h{display:flex;align-items:center;gap:6px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.dr-h .tab{height:36px;padding:0 14px;border-radius:999px;font:600 13px var(--sans);color:var(--mute)}
+.dr-h .tab[aria-selected="true"]{background:var(--chalk);color:var(--ink)}
+.dr-h .x{margin-left:auto}
+.dr-b{flex:1;overflow-y:auto;padding:24px 22px 40px}
+.dr-b h3{font:900 44px/.9 var(--display);text-transform:uppercase;margin-bottom:6px}
+.dr-b .bn{color:var(--mute)}
+.rate{display:flex;align-items:center;gap:14px;border:1px solid var(--line2);border-radius:16px;padding:16px;margin-top:10px}
+.rate i{width:10px;height:44px;border-radius:6px}
+.rate b{font:800 26px/1 var(--display);text-transform:uppercase;display:block}
+.rate span{color:var(--mute);font-size:13px}
+.rate strong{margin-left:auto;font:900 34px/1 var(--display)}
+.map{position:relative;height:280px;border-radius:18px;overflow:hidden;border:1px solid var(--line2);margin:16px 0}
+.map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;filter:invert(.92) hue-rotate(180deg) saturate(.4) brightness(.9)}
+.map .pin{position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px;border-radius:50%;background:var(--lime);border:3px solid var(--ink);box-shadow:0 0 0 2px var(--lime),0 0 24px var(--lime);pointer-events:none}
+.coords{font:800 34px/1 var(--display);color:var(--lime);margin:14px 0 4px}
+.rules{display:grid;gap:8px;margin:14px 0 26px}
+.rules div{display:flex;gap:12px;align-items:baseline;border-bottom:1px dashed var(--line);padding-bottom:8px;color:var(--mute)}
+.rules div b{font:700 12px var(--mono);color:var(--lime)}
+details{border-top:1px solid var(--line2)}
+summary{list-style:none;cursor:pointer;padding:16px 0;font:700 20px/1.15 var(--display);text-transform:uppercase;display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--lime);font-family:var(--mono)}
+details[open] summary::after{content:"–"}
+details p{color:var(--mute);padding-bottom:16px}
+.contact{display:grid;gap:8px;margin-top:22px}
+
+/* ---------- strike fx ---------- */
+.slam{position:fixed;inset:0;z-index:55;display:grid;place-items:center;pointer-events:none}
+.slam h2{font:900 clamp(110px,22vw,340px)/.8 var(--display);letter-spacing:.02em;display:flex;transform:skewX(-10deg)}
+.slam h2 span{display:inline-block;color:var(--kit);-webkit-text-stroke:3px var(--ink);text-shadow:8px 8px 0 var(--ink),0 0 60px var(--kit);opacity:0}
+.slam.go h2 span{animation:slam .9s var(--spring) both,slamOut .5s var(--ease) 1.5s forwards;animation-delay:calc(var(--i)*55ms),calc(1.5s + var(--i)*30ms)}
+@keyframes slam{from{opacity:0;transform:translateY(-40px) scale(3) rotate(-12deg)}to{opacity:1;transform:none}}
+@keyframes slamOut{to{opacity:0;transform:translateY(60px) scale(.8)}}
+
+/* ---------- receipt ---------- */
+.rc{position:fixed;inset:0;z-index:50;display:grid;justify-items:center;align-content:start;padding:calc(var(--top) + 4px) 16px calc(var(--tick) + 16px);overflow-y:auto;background:radial-gradient(80% 70% at 50% 40%,transparent,rgba(2,3,2,.55))}
+.rc-in{width:min(440px,100%)}
+.printer{position:relative;z-index:2;height:44px;border-radius:14px;background:linear-gradient(#1a201b,#0c110d);border:1px solid var(--line2);display:flex;align-items:center;gap:10px;padding:0 16px;color:var(--mute);box-shadow:0 16px 30px -10px #000}
+.printer .led{width:8px;height:8px;border-radius:50%;background:var(--kit);box-shadow:0 0 10px var(--kit);animation:blink .4s infinite}
+.printer.idle .led{animation:none}
+.printer::after{content:"";position:absolute;left:18px;right:18px;bottom:-3px;height:6px;border-radius:3px;background:#000}
+.paper{overflow:hidden;margin:0 18px;padding-bottom:12px}
+.pass{position:relative;background:var(--chalk);color:var(--ink);padding:22px 22px 18px;transform:translateY(-102%);filter:drop-shadow(0 20px 30px rgba(0,0,0,.5))}
+.pass::after{content:"";position:absolute;left:0;right:0;bottom:-10px;height:10px;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='10'><path d='M0 0h20L10 10z' fill='%23f3f1e8'/></svg>") repeat-x}
+.pass.print{animation:print 2.2s steps(14) forwards}
+@keyframes print{to{transform:none}}
+.ps-top{display:flex;justify-content:space-between;align-items:center}
+.ps-top b{font:900 30px/1 var(--display);letter-spacing:.04em;transform:skewX(-9deg)}
+.ps-top span{color:rgba(5,8,6,.55)}
+.ps-team{margin:14px -22px;padding:14px 22px;background:var(--ink);color:var(--kit);display:flex;align-items:center;gap:12px}
+.ps-team i{width:22px;height:22px;border-radius:50%;background:var(--kit);flex:0 0 auto}
+.ps-team b{font:900 38px/.95 var(--display);text-transform:uppercase;word-break:break-word}
+.ps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 10px}
+.ps-grid small{display:block;font:600 9px var(--mono);letter-spacing:.12em;color:rgba(5,8,6,.5)}
+.ps-grid b{font:800 22px/1.05 var(--display);text-transform:uppercase}
+.ps-cap{margin-top:14px;padding-top:12px;border-top:1px dashed rgba(5,8,6,.3);color:rgba(5,8,6,.65)}
+.ps-bar{margin-top:14px;height:54px}
+.ps-bar svg{width:100%;height:100%}
+.ps-id{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.ps-id b{font:700 18px var(--mono)}
+.ps-stamp{position:absolute;right:20px;bottom:64px;font:900 18px/1 var(--display);text-transform:uppercase;color:var(--flare);border:2.5px solid var(--flare);border-radius:6px;padding:5px 8px;transform:rotate(-10deg);background:rgba(243,241,232,.85);opacity:0}
+.pass.print .ps-stamp{animation:stamp .4s var(--spring) 2.3s forwards}
+@keyframes stamp{from{opacity:0;transform:rotate(-10deg) scale(2.2)}to{opacity:1;transform:rotate(-10deg) scale(1)}}
+.rc-act{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px;opacity:0;transform:translateY(10px);transition:.6s var(--out)}
+.rc-act.on{opacity:1;transform:none}
+.rc-act .btn{height:46px;font-size:14px}
+.rc-act .wide{grid-column:1/-1}
+.rc-note{grid-column:1/-1;text-align:center;color:var(--mute);font-size:13px;margin-top:4px;text-shadow:0 1px 8px #000}
+
+.toast{position:fixed;left:50%;top:calc(var(--top) + 10px);z-index:70;transform:translate(-50%,-20px);opacity:0;background:var(--chalk);color:var(--ink);padding:10px 18px;border-radius:999px;font-weight:600;font-size:14px;transition:.4s var(--out);pointer-events:none;max-width:calc(100vw - 32px)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1100px){ .rn .v{display:none} .live-t{display:none} }
+@media (max-width:900px){
+  :root{--top:58px;--tick:34px}
+  .top{padding:0 14px;gap:10px}
+  .logo{font-size:24px}
+  .rail{position:fixed;top:var(--top);left:14px;right:14px;max-width:none;padding:0;height:22px}
+  .rail-track{top:10px;left:8px;right:8px}
+  .rn .l,.rn .v{display:none}
+  .rn .d{margin-top:5px}
+  .cur-l{display:block;margin-left:auto;color:var(--kit)}
+  .top-r .chip:not(.icb){display:none}
+  .gate{padding:0 18px 18px;justify-content:flex-end}
+  .neon{font-size:clamp(84px,26vw,150px)}
+  .greet{font-size:14px;min-height:4.4em}
+  .g-row{flex-direction:column;gap:10px;margin-top:14px}
+  .now{min-width:0;grid-template-columns:1fr 1fr;gap:8px 14px;padding:12px 14px}
+  .now div b{font-size:21px}
+  .desk{left:0;right:0;width:auto;top:auto;bottom:var(--tick);max-height:58svh;border-radius:24px 24px 0 0;border-bottom:0}
+  .desk.hidden{transform:translateY(40px)}
+  .desk-h{padding:12px 18px}
+  .desk-b{padding:16px 18px 20px}
+  .q{font-size:38px}
+  .hint{margin:6px 0 12px}
+  .dates{grid-template-columns:repeat(7,64px);overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
+  .dt{scroll-snap-align:start}
+  .sq{grid-template-columns:96px 1fr}.sq svg{width:96px;height:60px}.sq b{font-size:36px}
+  .kit i{width:38px;height:38px}
+  .ps-team b{font-size:30px}
+  .ps-grid b{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;animation-delay:0s!important;transition-duration:.001s!important}
+}
+</style>
+</head>
+<body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="shade"></div>
+<div class="flash" id="flash"></div>
+
+<div class="boot" id="boot"><b>STRIKE</b><i></i><span class="mono">Unlocking the gate</span></div>
+
+<header class="top">
+  <a class="logo" href="#" id="home" aria-label="STRIKE — back to the gate"><i></i><span>STRIKE</span></a>
+  <nav class="rail" id="rail" aria-label="Booking progress">
+    <div class="rail-track"><div class="rail-fill" id="railFill"></div><div class="rail-ball" id="railBall"></div></div>
+  </nav>
+  <span class="cur-l mono" id="curL"></span>
+  <div class="top-r">
+    <span class="chip mono" title="Live at STRIKE, Khulna time"><span class="rec"></span><span id="clock">--:--:--</span><span class="live-t" id="wxChip"></span></span>
+    <button class="chip icb" id="snd" aria-pressed="false" aria-label="Sound" title="Sound"></button>
+    <button class="chip icb" id="info" aria-label="Rates, location and rules" title="Rates · Find us · Rules"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+  </div>
+</header>
+
+<!-- STEP 0: THE GATE -->
+<section class="gate" id="gate" aria-labelledby="neon">
+  <p class="g-kick mono"><i></i>JoyBangla Mor · Khulna · 22.8065°N</p>
+  <h1 class="neon" id="neon" aria-label="STRIKE"><span style="--i:0">S</span><span style="--i:1">T</span><span style="--i:2">R</span><span style="--i:3">I</span><span style="--i:4">K</span><span style="--i:5">E</span></h1>
+  <p class="g-bn bn">স্ট্রাইকে স্বাগতম — মাঠ তোমার অপেক্ষায়।</p>
+  <p class="greet" id="greet"></p>
+  <div class="g-row">
+    <div class="now" id="nowCard">
+      <span class="mono"><span class="rec"></span>Right now on the pitch</span>
+      <div><b id="nStatus">—</b><span id="nStatusS"></span></div>
+      <div><b id="nWx">—</b><span id="nWxS">Live weather</span></div>
+      <div><b id="nLeft">—</b><span>Slots left today</span></div>
+      <div><b id="nNext">—</b><span id="nNextS">Next open kick-off</span></div>
+    </div>
+    <div class="now mine" id="mineCard" hidden></div>
+    <div class="g-btns">
+      <button class="btn btn-k btn-big" id="walk">Walk in &amp; book <span class="arr">→</span></button>
+      <div class="g-links"><button class="btn btn-g" data-drawer="rates">Rates</button><button class="btn btn-g" data-drawer="find">Find us</button><button class="btn btn-g" data-drawer="rules">Rules</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- STEPS 1-5: THE FRONT DESK -->
+<aside class="desk hidden" id="desk" aria-live="polite">
+  <div class="desk-h mono"><span>Front desk · <b id="deskC">Counter 01</b></span><span id="deskS">1 / 5</span></div>
+  <div class="desk-b" id="deskB"></div>
+  <div class="desk-f"><button class="btn btn-g" id="back">← Back</button><button class="btn btn-k" id="next">Next <span class="arr">→</span></button><button class="hold" id="hold" type="button" hidden aria-label="Press and hold to strike and book"><i></i><span id="holdL">Hold to strike</span></button></div>
+</aside>
+
+<div class="ticker" aria-label="Live updates"><span class="t-live"><i></i>LIVE</span><div class="t-wrap"><div class="t-track" id="tTrack"></div></div></div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="STRIKE information" aria-hidden="true">
+  <div class="dr-h"><button class="tab" data-tab="rates">Rates</button><button class="tab" data-tab="find">Find us</button><button class="tab" data-tab="rules">Rules &amp; FAQ</button><button class="chip icb x" id="drX" aria-label="Close">✕</button></div>
+  <div class="dr-b" id="drB"></div>
+</aside>
+
+<div class="slam" id="slam" aria-hidden="true"><h2><span style="--i:0">S</span><span style="--i:1">T</span><span style="--i:2">R</span><span style="--i:3">I</span><span style="--i:4">K</span><span style="--i:5">E</span><span style="--i:6">!</span></h2></div>
+
+<div class="rc" id="rc" hidden role="dialog" aria-modal="true" aria-label="Your match pass">
+  <div class="rc-in">
+    <div class="printer" id="printer"><span class="led"></span><span class="mono">STRIKE front desk · printing your pass</span></div>
+    <div class="paper"><div class="pass" id="pass"></div></div>
+    <div class="rc-act" id="rcAct"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script type="module">
+/* =====================================================================
+   CONFIG — placeholders. Edit hours / prices / contacts here; the whole
+   site (desk, rates, ticker, 3D scoreboard) reads from this block.
+   ===================================================================== */
+const CONFIG = {
+  name: "STRIKE",
+  whatsapp: "8801700000000",       // PLACEHOLDER — owner's WhatsApp, international format, no "+"
+  phone: "+880 1700-000000",       // PLACEHOLDER
+  currency: "৳",
+  slotMinutes: 90,
+  firstKickoff: "06:00",           // PLACEHOLDER opening time
+  slotsPerDay: 12,                 // 06:00 → 24:00
+  bookAheadDays: 14,
+  advancePercent: 30,              // PLACEHOLDER
+  weekendDays: [5, 6],             // Fri, Sat
+  weekendSurcharge: 300,           // PLACEHOLDER
+  tiers: [                         // PLACEHOLDER prices
+    { id: "dawn",  name: "Dawn",  bn: "ভোর", from: "06:00", to: "09:00", price: 1500, color: "#7fd6ff" },
+    { id: "day",   name: "Day",   bn: "দিন", from: "09:00", to: "16:30", price: 1800, color: "#f3f1e8" },
+    { id: "prime", name: "Prime", bn: "রাত", from: "16:30", to: "24:00", price: 2800, color: "#d4ff3a" }
+  ],
+  squads: [5, 6, 7],
+  demoOccupancy: 0.4,              // DEMO ONLY — fakes other teams' bookings until a backend exists. Set 0 at launch.
+  lat: 22.80649767795758,
+  lng: 89.52512328868221
+};
+const KITS = [
+  { n: "Lime", c: "#d4ff3a" }, { n: "Flare", c: "#ff5a1f" }, { n: "Sky", c: "#5cc8ff" },
+  { n: "Crimson", c: "#ff2d4a" }, { n: "Royal", c: "#5b6cff" }, { n: "Chalk", c: "#f3f1e8" }
+];
+const TEAM_IDEAS = ["Rupsha Rovers", "Sundarbans Tigers", "Bhairab Blasters", "Golpata United", "Shibbari Strikers", "Sonadanga FC", "Khan Jahan XI", "Daulatpur Dynamos", "Boyra Bulls", "Gollamari Galaxy", "Mongla Mariners", "Royal Bengal FC"];
+
+/* ---------- utils ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const pad = n => String(n).padStart(2, "0");
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const toMin = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
+const fmt24 = m => `${pad(Math.floor(m / 60) % 24)}:${pad(m % 60)}`;
+const fmt12 = m => { const h = Math.floor(m / 60) % 24; return `${(h % 12) || 12}:${pad(m % 60)} ${h < 12 ? "AM" : "PM"}`; };
+const money = n => CONFIG.currency + n.toLocaleString("en-IN");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isMobile = () => innerWidth <= 900;
+const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+/* Khulna is UTC+6 all year — everything runs on Khulna time, whatever the visitor's clock says. */
+const KHL = 360;
+const khl = () => new Date(Date.now() + KHL * 60000);
+const nowMin = () => { const d = khl(); return d.getUTCHours() * 60 + d.getUTCMinutes() + d.getUTCSeconds() / 60; };
+
+/* ---------- model ---------- */
+const tierFor = ko => CONFIG.tiers.find(t => ko >= toMin(t.from) && ko < toMin(t.to)) || CONFIG.tiers.at(-1);
+const SLOTS = Array.from({ length: CONFIG.slotsPerDay }, (_, i) => {
+  const ko = toMin(CONFIG.firstKickoff) + i * CONFIG.slotMinutes;
+  return { i, ko, ft: ko + CONFIG.slotMinutes, tier: tierFor(ko) };
+});
+const OPEN = SLOTS[0].ko, CLOSE = SLOTS.at(-1).ft;
+function buildDays() {
+  const n = khl();
+  return Array.from({ length: CONFIG.bookAheadDays }, (_, i) => {
+    const dt = new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate() + i));
+    return { i, key: dt.toISOString().slice(0, 10), d: dt.getUTCDate(), m: dt.getUTCMonth(), dow: dt.getUTCDay() };
+  });
+}
+let DAYS = buildDays();
+const isWeekend = d => CONFIG.weekendDays.includes(d.dow);
+const priceFor = (d, s) => s.tier.price + (isWeekend(d) ? CONFIG.weekendSurcharge : 0);
+const cap = s => s[0] + s.slice(1).toLowerCase();
+const dayName = d => d.i === 0 ? "Today" : d.i === 1 ? "Tomorrow" : `${cap(DOW[d.dow])} ${d.d} ${cap(MON[d.m])}`;
+function hash(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return ((h >>> 0) % 10000) / 10000; }
+function demoTaken(d, s) {
+  const w = { dawn: .55, day: .7, prime: 1.5 }[s.tier.id] ?? 1;
+  return hash(d.key + "#" + s.i) < CONFIG.demoOccupancy * w * (1.35 - d.i * .06) * (isWeekend(d) ? 1.25 : 1);
+}
+let bookings = store.get("strike-bookings", []);
+function statusOf(d, s) {
+  const mine = bookings.find(b => b.day === d.key && b.slot === s.i);
+  if (d.i === 0) {
+    const n = nowMin();
+    if (n >= s.ft) return { s: "past", label: "Full time" };
+    if (n >= s.ko) { const t = mine || demoTaken(d, s); return { s: "live", label: t ? `In play ${Math.min(90, Math.floor(n - s.ko) + 1)}'` : "Kicked off", taken: !!t, min: Math.min(90, Math.floor(n - s.ko) + 1) }; }
+  }
+  if (mine) return { s: "mine", label: "Yours" };
+  if (demoTaken(d, s)) return { s: "taken", label: "Booked" };
+  return { s: "open", label: "Open" };
+}
+const openCount = d => SLOTS.filter(s => statusOf(d, s).s === "open").length;
+function findNext() { for (const d of DAYS) for (const s of SLOTS) if (statusOf(d, s).s === "open") return { d, s }; return null; }
+function liveNow() {
+  const m = nowMin(), today = DAYS[0];
+  const open = m >= OPEN && m < CLOSE;
+  const slot = SLOTS.find(s => m >= s.ko && m < s.ft);
+  const st = slot ? statusOf(today, slot) : null;
+  return { m, open, slot, inPlay: !!(st && st.taken), minute: st?.min ?? 0, next: findNext(), left: openCount(today) };
+}
+function upcomingMine() {
+  const n = nowMin(), todayKey = DAYS[0].key;
+  return bookings.filter(b => b.day > todayKey || (b.day === todayKey && SLOTS[b.slot].ft > n)).sort((a, b) => (a.day + pad(a.slot)).localeCompare(b.day + pad(b.slot)))[0] || null;
+}
+
+/* ---------- live weather (Open-Meteo, no key) ---------- */
+let WX = null;
+async function loadWeather() {
+  try {
+    const u = `https://api.open-meteo.com/v1/forecast?latitude=${CONFIG.lat}&longitude=${CONFIG.lng}&current=temperature_2m,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,precipitation_probability_max&timezone=Asia%2FDhaka&forecast_days=16`;
+    const r = await fetch(u); if (!r.ok) throw 0;
+    WX = await r.json();
+  } catch { /* keep last */ }
+}
+function wxInfo(code, prob = null) {
+  const o = { kind: "sun", label: "Clear", rain: 0, cloud: 0, storm: 0, fog: 0, code };
+  if (code == null) return { ...o, kind: "na", label: "—" };
+  if (code === 1) Object.assign(o, { kind: "partly", label: "Mostly clear", cloud: .2 });
+  else if (code === 2) Object.assign(o, { kind: "partly", label: "Partly cloudy", cloud: .45 });
+  else if (code === 3) Object.assign(o, { kind: "cloud", label: "Overcast", cloud: .8 });
+  else if (code === 45 || code === 48) Object.assign(o, { kind: "fog", label: "Fog", cloud: .6, fog: 1 });
+  else if (code >= 51 && code <= 57) Object.assign(o, { kind: "rain", label: "Drizzle", cloud: .7, rain: .35 });
+  else if (code >= 61 && code <= 67) Object.assign(o, { kind: "rain", label: "Rain", cloud: .85, rain: .8 });
+  else if (code >= 80 && code <= 82) Object.assign(o, { kind: "rain", label: "Showers", cloud: .75, rain: .7 });
+  else if (code >= 95) Object.assign(o, { kind: "storm", label: "Thunderstorm", cloud: .95, rain: 1, storm: 1 });
+  if (prob != null && o.rain > 0 && prob < 35) o.rain *= .3;
+  return o;
+}
+const wxNow = () => WX?.current ? { ...wxInfo(WX.current.weather_code), temp: Math.round(WX.current.temperature_2m), wind: Math.round(WX.current.wind_speed_10m) } : null;
+function wxAt(dayKey, minute) {
+  if (!WX?.hourly) return null;
+  const i = WX.hourly.time.indexOf(`${dayKey}T${pad(Math.floor(minute / 60) % 24)}:00`);
+  if (i < 0) return null;
+  const prob = WX.hourly.precipitation_probability[i];
+  return { ...wxInfo(WX.hourly.weather_code[i], prob), temp: Math.round(WX.hourly.temperature_2m[i]), prob };
+}
+function wxDay(dayKey) {
+  if (!WX?.daily) return null;
+  const i = WX.daily.time.indexOf(dayKey); if (i < 0) return null;
+  const prob = WX.daily.precipitation_probability_max[i];
+  return { ...wxInfo(WX.daily.weather_code[i], prob), temp: Math.round(WX.daily.temperature_2m_max[i]), prob };
+}
+function wxIcon(kind, night) {
+  const sun = `<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>`;
+  const moon = `<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>`;
+  const p = {
+    sun: night ? moon : sun, na: `<path d="M8 12h8"/>`,
+    partly: `<g transform="translate(-3 -3) scale(.7)">${night ? moon : sun}</g><path d="M9 20h8a3.5 3.5 0 0 0 .4-7 5 5 0 0 0-9.6 1.4A3 3 0 0 0 9 20z"/>`,
+    cloud: `<path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 11a3.5 3.5 0 0 0 1 7z"/>`,
+    fog: `<path d="M4 9h16M2 13h20M5 17h14"/>`,
+    rain: `<path d="M7 15h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 8a3.5 3.5 0 0 0 1 7z"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3"/>`,
+    storm: `<path d="M7 15h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 8a3.5 3.5 0 0 0 1 7z"/><path d="M13 15l-3 4h4l-3 4"/>`
+  }[kind] || "";
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+}
+const isNightMin = m => m < 345 || m >= 1065;
+
+/* ---------- sound (WebAudio, synthesized, off by default) ---------- */
+const Snd = (() => {
+  let ctx = null, out = null, on = false;
+  const ensure = () => {
+    if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); out = ctx.createGain(); out.gain.value = .55; out.connect(ctx.destination); }
+    if (ctx.state === "suspended") ctx.resume();
+  };
+  const env = (node, a, d, peak, t = ctx.currentTime) => { const g = ctx.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(.0001, t + a + d); node.connect(g); g.connect(out); return g; };
+  const noise = dur => { const b = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; const s = ctx.createBufferSource(); s.buffer = b; return s; };
+  const osc = (type, f) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; return o; };
+  const fx = {
+    tick() { const o = osc("sine", 900); o.frequency.exponentialRampToValueAtTime(1500, ctx.currentTime + .05); env(o, .005, .07, .12); o.start(); o.stop(ctx.currentTime + .1); },
+    clunk() { const n = noise(.4), f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 500; n.connect(f); env(f, .004, .3, .55); n.start(); const o = osc("sine", 70); o.frequency.exponentialRampToValueAtTime(38, ctx.currentTime + .25); env(o, .004, .3, .5); o.start(); o.stop(ctx.currentTime + .4); },
+    whistle() { [0, .28].forEach((dt, k) => { const t = ctx.currentTime + dt, o = osc("sine", 2950), l = osc("sine", 32), lg = ctx.createGain(); lg.gain.value = 140; l.connect(lg); lg.connect(o.frequency); env(o, .02, k ? .55 : .18, .2, t); o.start(t); l.start(t); o.stop(t + .8); l.stop(t + .8); }); },
+    kick() { const o = osc("sine", 160); o.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + .16); env(o, .002, .2, .9); o.start(); o.stop(ctx.currentTime + .3); const n = noise(.08), f = ctx.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 1800; n.connect(f); env(f, .001, .06, .4); n.start(); },
+    roar() { const n = noise(3.2), f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 800; f.Q.value = .6; n.connect(f); env(f, .35, 2.6, .7); n.start(); },
+    print() { for (let i = 0; i < 14; i++) { const t = ctx.currentTime + i * .155, n = noise(.12), f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 2400; f.Q.value = 2; n.connect(f); env(f, .005, .1, .18, t); n.start(t); } },
+    swoosh() { const n = noise(.6), f = ctx.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 1.2; f.frequency.setValueAtTime(300, ctx.currentTime); f.frequency.exponentialRampToValueAtTime(2400, ctx.currentTime + .5); n.connect(f); env(f, .15, .4, .25); n.start(); }
+  };
+  return {
+    get on() { return on; },
+    toggle() { on = !on; if (on) { ensure(); fx.tick(); } return on; },
+    play(name) { if (!on || !ctx) return; try { fx[name](); } catch {} }
+  };
+})();
+
+/* =====================================================================
+   THE 3D TURF
+   ===================================================================== */
+function createWorld(THREE, PP) {
+  const canvas = $("#scene");
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" }); } catch { return null; }
+  const V3 = THREE.Vector3, Col = THREE.Color, rnd = (a, b) => a + Math.random() * (b - a);
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, isMobile() ? 1.5 : 1.75));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, .1, 1500);
+  scene.fog = new THREE.Fog(0x0a1410, 90, 330);
+  const composer = new PP.EffectComposer(renderer);
+  composer.addPass(new PP.RenderPass(scene, camera));
+  const bloom = new PP.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .38, .45, .9);
+  composer.addPass(bloom); composer.addPass(new PP.OutputPass());
+  function resize() { renderer.setSize(innerWidth, innerHeight, false); composer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+  resize(); addEventListener("resize", resize);
+
+  const mkCv = (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
+  const mkTex = cv => { const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return t; };
+  const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: .8, ...o });
+
+  /* sky */
+  const skyU = { top: { value: new Col() }, bot: { value: new Col() }, sunDir: { value: new V3(0, 1, 0) }, sunCol: { value: new Col(1, .85, .6) }, sunAmt: { value: 0 } };
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(700, 32, 16), new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false, uniforms: skyU,
+    vertexShader: `varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `uniform vec3 top; uniform vec3 bot; uniform vec3 sunDir; uniform vec3 sunCol; uniform float sunAmt; varying vec3 vP;
+      void main(){ vec3 d = normalize(vP); float h = clamp(d.y*1.5+0.06,0.0,1.0); vec3 c = mix(bot, top, pow(h,0.6));
+        float s = max(dot(d, normalize(sunDir)), 0.0); c += sunCol * (pow(s,1200.0)*8.0 + pow(s,12.0)*0.3) * sunAmt;
+        gl_FragColor = vec4(c,1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`
+  }));
+  sky.renderOrder = -1; scene.add(sky);
+  const stars = (() => {
+    const n = 900, p = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { const v = new V3(rnd(-1, 1), rnd(.08, 1), rnd(-1, 1)).normalize().multiplyScalar(650); p.set([v.x, v.y, v.z], i * 3); }
+    const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(p, 3));
+    return new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffffff, size: 1.7, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false, fog: false }));
+  })();
+  scene.add(stars);
+  const moon = new THREE.Mesh(new THREE.SphereGeometry(9, 24, 16), new THREE.MeshBasicMaterial({ color: 0xf4f1e0, transparent: true, opacity: 0, fog: false }));
+  moon.position.set(-180, 260, -520); scene.add(moon);
+
+  /* lights */
+  const hemi = new THREE.HemisphereLight(0xcfe0ff, 0x223322, .5); scene.add(hemi);
+  const sun = new THREE.DirectionalLight(0xfff0d8, 1.5); scene.add(sun, sun.target);
+  const moonL = new THREE.DirectionalLight(0x9db4ff, 0); moonL.position.set(-60, 90, -80); scene.add(moonL);
+
+  /* ground, apron, city */
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), std(0x0f1411, { roughness: 1 }));
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -.03; scene.add(ground);
+  const apron = new THREE.Mesh(new THREE.PlaneGeometry(64, 52), std(0x1b201c, { roughness: .95 }));
+  apron.rotation.x = -Math.PI / 2; apron.position.y = -.015; scene.add(apron);
+  const winCv = mkCv(64, 128), wc = winCv.getContext("2d");
+  wc.fillStyle = "#000"; wc.fillRect(0, 0, 64, 128);
+  for (let y = 4; y < 128; y += 12) for (let x = 4; x < 64; x += 14) if (Math.random() < .42) { wc.fillStyle = Math.random() < .8 ? "#ffcf86" : "#bfe4ff"; wc.fillRect(x, y, 8, 6); }
+  const winTex = mkTex(winCv); winTex.wrapS = winTex.wrapT = THREE.RepeatWrapping;
+  const cityMat = std(0x0c100e, { emissive: 0xffffff, emissiveMap: winTex, emissiveIntensity: 0, roughness: .9 });
+  for (let i = 0; i < 70; i++) {
+    const a = rnd(0, Math.PI * 2), r = rnd(105, 230), w = rnd(8, 18), d = rnd(8, 16), h = rnd(6, 28);
+    const g = new THREE.BoxGeometry(w, h, d), uv = g.attributes.uv;
+    for (let k = 0; k < uv.count; k++) uv.setXY(k, uv.getX(k) * w / 8, uv.getY(k) * h / 10);
+    const b = new THREE.Mesh(g, cityMat); b.position.set(Math.cos(a) * r, h / 2, Math.sin(a) * r); b.rotation.y = rnd(0, 3); scene.add(b);
+  }
+
+  /* turf — 40 x 25 m playing area, painted on a canvas so selections can repaint it */
+  const L = 40, Wd = 25, TL = 44, TW = 29;
+  const turfCv = mkCv(2048, Math.round(2048 * TW / TL)), turfTex = mkTex(turfCv);
+  const turf = new THREE.Mesh(new THREE.PlaneGeometry(TL, TW), std(0xffffff, { map: turfTex, roughness: .93 }));
+  turf.rotation.x = -Math.PI / 2; scene.add(turf);
+  const grain = mkCv(256, 256); { const g = grain.getContext("2d"); for (let i = 0; i < 2600; i++) { g.fillStyle = Math.random() < .5 ? "rgba(0,0,0,.09)" : "rgba(255,255,255,.05)"; g.fillRect(Math.random() * 256, Math.random() * 256, 2, 3); } }
+  let curLabel = null, curSub = null;
+  function drawTurf(label, sub) {
+    const c = turfCv.getContext("2d"), W = turfCv.width, H = turfCv.height, k = W / TL;
+    const X = x => (x + TL / 2) * k, Y = z => (z + TW / 2) * k;
+    for (let i = 0; i < 22; i++) { c.fillStyle = i % 2 ? "#2f9a4c" : "#2a8b44"; c.fillRect(i * W / 22, 0, W / 22 + 1, H); }
+    c.fillStyle = c.createPattern(grain, "repeat"); c.fillRect(0, 0, W, H);
+    c.strokeStyle = "rgba(255,255,255,.93)"; c.fillStyle = "rgba(255,255,255,.93)"; c.lineWidth = .12 * k;
+    const rect = (x1, z1, x2, z2) => c.strokeRect(X(x1), Y(z1), X(x2) - X(x1), Y(z2) - Y(z1));
+    rect(-L / 2, -Wd / 2, L / 2, Wd / 2);
+    c.beginPath(); c.moveTo(X(0), Y(-Wd / 2)); c.lineTo(X(0), Y(Wd / 2)); c.stroke();
+    c.beginPath(); c.arc(X(0), Y(0), 3 * k, 0, Math.PI * 2); c.stroke();
+    const dot = (x, z) => { c.beginPath(); c.arc(X(x), Y(z), .18 * k, 0, Math.PI * 2); c.fill(); };
+    dot(0, 0);
+    for (const s of [-1, 1]) {
+      rect(Math.min(s * 20, s * 13), -7, Math.max(s * 20, s * 13), 7);
+      rect(Math.min(s * 20, s * 18), -3.5, Math.max(s * 20, s * 18), 3.5);
+      dot(s * 14, 0);
+    }
+    for (const [x, z, a] of [[-20, -12.5, 0], [20, -12.5, Math.PI / 2], [20, 12.5, Math.PI], [-20, 12.5, Math.PI * 1.5]]) { c.beginPath(); c.arc(X(x), Y(z), .8 * k, a, a + Math.PI / 2); c.stroke(); }
+    c.textAlign = "center"; c.textBaseline = "middle";
+    c.fillStyle = "rgba(255,255,255,.16)"; c.font = `900 ${3.2 * k}px "Big Shoulders Display", Impact, sans-serif`;
+    c.fillText("STRIKE", X(7.5), Y(0));
+    if (label) {
+      c.fillStyle = "rgba(255,255,255,.88)"; c.font = `900 ${2.6 * k}px "Big Shoulders Display", Impact, sans-serif`;
+      c.fillText(label, X(-7.5), Y(sub ? -1.3 : 0));
+      if (sub) { c.font = `800 ${1.9 * k}px "Big Shoulders Display", Impact, sans-serif`; c.fillStyle = "rgba(212,255,58,.95)"; c.fillText(sub, X(-7.5), Y(1.5)); }
+    }
+    turfTex.needsUpdate = true;
+  }
+
+  /* cage — the netted enclosure every Khulna turf has */
+  const CL = TL + 2, CW = TW + 2, CH = 7.5;
+  const poleMat = std(0x2b322d, { metalness: .6, roughness: .45 });
+  const poleG = new THREE.CylinderGeometry(.07, .07, CH, 8);
+  const addPole = (x, z) => { const m = new THREE.Mesh(poleG, poleMat); m.position.set(x, CH / 2, z); scene.add(m); };
+  for (let i = 0; i <= 12; i++) { const x = -CL / 2 + i * CL / 12; addPole(x, -CW / 2); if (Math.abs(x) > 2.4) addPole(x, CW / 2); }
+  for (let i = 1; i < 8; i++) { const z = -CW / 2 + i * CW / 8; addPole(-CL / 2, z); addPole(CL / 2, z); }
+  const netCv = mkCv(64, 64), nc = netCv.getContext("2d"); nc.strokeStyle = "rgba(255,255,255,.75)"; nc.lineWidth = 2; nc.strokeRect(0, 0, 64, 64);
+  const mkNet = (w, h) => { const t = mkTex(netCv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(w / .7, h / .7); return new THREE.MeshBasicMaterial({ map: t, color: 0x8d988f, transparent: true, opacity: .42, side: THREE.DoubleSide, depthWrite: false }); };
+  const net = (w, h, x, y, z, ry) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mkNet(w, h)); m.position.set(x, y, z); m.rotation.y = ry; scene.add(m); };
+  net(CL, CH, 0, CH / 2, -CW / 2, 0); net(CW, CH, -CL / 2, CH / 2, 0, Math.PI / 2); net(CW, CH, CL / 2, CH / 2, 0, Math.PI / 2);
+  const gw = 2.5, side = (CL / 2 - gw);
+  net(side, CH, -(gw + side / 2), CH / 2, CW / 2, 0); net(side, CH, gw + side / 2, CH / 2, CW / 2, 0); net(gw * 2, CH - 3.4, 0, 3.4 + (CH - 3.4) / 2, CW / 2, 0);
+  for (const x of [-gw, gw]) { const m = new THREE.Mesh(new THREE.CylinderGeometry(.13, .13, CH, 10), poleMat); m.position.set(x, CH / 2, CW / 2); scene.add(m); }
+  { const m = new THREE.Mesh(new THREE.BoxGeometry(gw * 2, .22, .22), poleMat); m.position.set(0, 3.4, CW / 2); scene.add(m); }
+  for (const [w, x, z, ry] of [[CL, 0, -CW / 2, 0], [CL, 0, CW / 2, 0], [CW, -CL / 2, 0, Math.PI / 2], [CW, CL / 2, 0, Math.PI / 2]]) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, .1, .1), poleMat); m.position.set(x, CH, z); m.rotation.y = ry; scene.add(m); }
+
+  /* neon gate sign */
+  const neonCv = mkCv(1024, 256), neonTex = mkTex(neonCv);
+  const drawNeon = () => { const c = neonCv.getContext("2d"); c.textAlign = "center"; c.textBaseline = "middle"; c.font = `900 190px "Big Shoulders Display", Impact, sans-serif`;
+    c.clearRect(0, 0, 1024, 256); c.shadowColor = "#d4ff3a"; for (const b of [40, 20, 8]) { c.shadowBlur = b; c.fillStyle = "#e9ff9a"; c.fillText("STRIKE", 512, 136); } c.shadowBlur = 0; c.fillStyle = "#fbffe8"; c.fillText("STRIKE", 512, 136); neonTex.needsUpdate = true; };
+  drawNeon();
+  const signBox = new THREE.Mesh(new THREE.BoxGeometry(7.4, 1.9, .18), std(0x080b09)); signBox.position.set(0, 4.75, CW / 2 + .2); scene.add(signBox);
+  const neonMat = new THREE.MeshBasicMaterial({ map: neonTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
+  neonMat.color.setScalar(0);
+  const neon = new THREE.Mesh(new THREE.PlaneGeometry(7, 1.75), neonMat); neon.position.set(0, 4.75, CW / 2 + .31); scene.add(neon);
+  const neonLight = new THREE.PointLight(0xd4ff3a, 0, 14, 2); neonLight.position.set(0, 4, CW / 2 + 1.5); scene.add(neonLight);
+  let neonAmt = 0, neonGoal = 0, neonT = 0;
+
+  /* floodlight towers */
+  const towers = [];
+  [[-25, -18], [25, -18], [-25, 18], [25, 18]].forEach(([x, z], i) => {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(.16, .3, 16, 10), poleMat); pole.position.set(x, 8, z); scene.add(pole);
+    const head = new THREE.Group(); head.position.set(x, 16.2, z); scene.add(head);
+    head.lookAt(x * .2, 0, z * .2);
+    head.add(new THREE.Mesh(new THREE.BoxGeometry(3.4, 2.1, .3), std(0x151a16)));
+    const lampMat = new THREE.MeshStandardMaterial({ color: 0x222222, emissive: 0xfff4da, emissiveIntensity: 0 });
+    for (let r = 0; r < 2; r++) for (let q = 0; q < 3; q++) { const l = new THREE.Mesh(new THREE.BoxGeometry(.9, .75, .1), lampMat); l.position.set(-1.05 + q * 1.05, -.45 + r * .9, .18); head.add(l); }
+    const spot = new THREE.SpotLight(0xfff3d9, 0, 0, .62, .6, 0);
+    spot.position.set(x, 16, z); spot.target.position.set(x * .22, 0, z * .22); scene.add(spot, spot.target);
+    const dist = Math.hypot(x * .78, 16, z * .78);
+    const cg = new THREE.ConeGeometry(dist * .55, dist, 32, 1, true); cg.translate(0, -dist / 2, 0); cg.rotateX(-Math.PI / 2);
+    const cone = new THREE.Mesh(cg, new THREE.MeshBasicMaterial({ color: 0xfffbe0, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+    cone.position.set(x, 16, z); cone.lookAt(x * .22, 0, z * .22); scene.add(cone);
+    towers.push({ lampMat, spot, cone, v: 0, goal: 0, delay: 0, flick: 0, i, clunked: false });
+  });
+
+  /* goals */
+  const frameMat = std(0xf2f2ea, { roughness: .4 });
+  const netMat = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: .32 });
+  let backNet = null, backBase = null;
+  for (const s of [1, -1]) {
+    const g = new THREE.Group(); g.position.x = 20 * s; g.rotation.y = s > 0 ? 0 : Math.PI; scene.add(g);
+    const post = new THREE.CylinderGeometry(.06, .06, 2, 10);
+    for (const z of [-2.5, 2.5]) { const p = new THREE.Mesh(post, frameMat); p.position.set(0, 1, z); g.add(p); const b = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, 2, 6), frameMat); b.position.set(1.2, 1, z); g.add(b); }
+    const bar = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, 5.12, 10), frameMat); bar.rotation.x = Math.PI / 2; bar.position.set(0, 2, 0); g.add(bar);
+    const bn = new THREE.Mesh(new THREE.PlaneGeometry(5, 2, 26, 10), netMat); bn.rotation.y = -Math.PI / 2; bn.position.set(1.2, 1, 0); g.add(bn);
+    for (const z of [-2.5, 2.5]) { const sn = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 2, 6, 10), netMat); sn.position.set(.6, 1, z); g.add(sn); }
+    const tn = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 5, 6, 26), netMat); tn.rotation.x = -Math.PI / 2; tn.position.set(.6, 2, 0); g.add(tn);
+    if (s > 0) { backNet = bn; backBase = bn.geometry.attributes.position.array.slice(); }
+  }
+  let ripple = null;
+
+  /* LED perimeter board */
+  const ledCv = mkCv(4096, 128), ledTex = mkTex(ledCv); ledTex.wrapS = THREE.RepeatWrapping;
+  const ledMat = new THREE.MeshBasicMaterial({ map: ledTex, toneMapped: false }); ledMat.color.setScalar(1.6);
+  const led = new THREE.Mesh(new THREE.PlaneGeometry(36, 1.1), ledMat); led.position.set(0, .6, -TW / 2 + .2); scene.add(led);
+  const ledBack = new THREE.Mesh(new THREE.BoxGeometry(36.4, 1.3, .25), std(0x0a0d0b)); ledBack.position.set(0, .6, -TW / 2 + .03); scene.add(ledBack);
+  let ledKey = "";
+  function drawLED(text, color) {
+    const key = text + color; if (key === ledKey) return; ledKey = key;
+    const c = ledCv.getContext("2d"), W = 4096, H = 128;
+    c.fillStyle = "#020302"; c.fillRect(0, 0, W, H);
+    c.font = `800 92px "Big Shoulders Display", Impact, sans-serif`; c.textBaseline = "middle";
+    const seg = c.measureText(text).width + 120, n = Math.max(1, Math.floor(W / seg)), step = W / n;
+    c.fillStyle = color;
+    for (let i = 0; i < n; i++) c.fillText(text, i * step + 40, H / 2 + 4);
+    c.fillStyle = "rgba(0,0,0,.55)";
+    for (let x = 0; x < W; x += 8) c.fillRect(x, 0, 2, H);
+    for (let y = 0; y < H; y += 8) c.fillRect(0, y, W, 2);
+    ledTex.needsUpdate = true;
+  }
+
+  /* scoreboard */
+  const sbCv = mkCv(1024, 512), sbTex = mkTex(sbCv);
+  const sbMat = new THREE.MeshBasicMaterial({ map: sbTex, toneMapped: false }); sbMat.color.setScalar(1.25);
+  const sb = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), sbMat); sb.position.set(0, 12, -CW / 2 - 5); scene.add(sb);
+  const sbBack = new THREE.Mesh(new THREE.BoxGeometry(12.6, 6.6, .4), std(0x0a0d0b)); sbBack.position.set(0, 12, -CW / 2 - 5.25); scene.add(sbBack);
+  for (const x of [-4, 4]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(.22, .22, 9, 8), poleMat); p.position.set(x, 4.5, -CW / 2 - 5.3); scene.add(p); }
+  let sbKey = "";
+  function drawBoard(d) {
+    const key = JSON.stringify(d); if (key === sbKey) return; sbKey = key;
+    const c = sbCv.getContext("2d"), W = 1024, H = 512, F = `"Big Shoulders Display", Impact, sans-serif`, M = `"JetBrains Mono", monospace`;
+    c.fillStyle = "#030504"; c.fillRect(0, 0, W, H);
+    c.strokeStyle = d.accent; c.lineWidth = 6; c.strokeRect(14, 14, W - 28, H - 28);
+    c.textBaseline = "middle";
+    c.fillStyle = d.accent; c.font = `900 56px ${F}`; c.textAlign = "left"; c.fillText("STRIKE", 48, 70);
+    c.textAlign = "right"; c.font = `600 26px ${M}`; c.fillStyle = d.tagColor || "#ff5a1f"; c.fillText(d.tag, W - 48, 70);
+    c.textAlign = "center"; c.fillStyle = "#f3f1e8";
+    let size = 150; c.font = `900 ${size}px ${F}`; while (c.measureText(d.big).width > W - 110 && size > 60) { size -= 6; c.font = `900 ${size}px ${F}`; }
+    c.fillText(d.big, W / 2, 228);
+    c.font = `700 40px ${M}`; c.fillStyle = d.accent; c.fillText(d.l1, W / 2, 344);
+    c.font = `500 30px ${M}`; c.fillStyle = "rgba(243,241,232,.75)"; c.fillText(d.l2, W / 2, 404);
+    c.fillStyle = "rgba(0,0,0,.4)"; for (let y = 0; y < H; y += 4) c.fillRect(0, y, W, 1);
+    sbTex.needsUpdate = true;
+  }
+
+  /* flag — your team's flag stays up after you book */
+  const flagCv = mkCv(512, 320), flagTex = mkTex(flagCv);
+  const fpole = new THREE.Mesh(new THREE.CylinderGeometry(.06, .08, 9, 8), frameMat); fpole.position.set(-7, 4.5, CW / 2 + 3.5); scene.add(fpole);
+  const flagG = new THREE.PlaneGeometry(2.6, 1.6, 18, 8); flagG.translate(1.3, 0, 0);
+  const flagBase = flagG.attributes.position.array.slice();
+  const flag = new THREE.Mesh(flagG, std(0xffffff, { map: flagTex, side: THREE.DoubleSide, roughness: .85 }));
+  flag.position.set(-6.94, 8.2, CW / 2 + 3.5); scene.add(flag);
+  let flagH = 8.2, flagGoal = 8.2, flagQueue = null, flagState = { team: "STRIKE", color: "#d4ff3a" };
+  function drawFlag(team, color) {
+    flagState = { team, color };
+    const c = flagCv.getContext("2d");
+    c.fillStyle = color; c.fillRect(0, 0, 512, 320);
+    c.fillStyle = "rgba(5,8,6,.9)"; c.beginPath(); c.moveTo(0, 320); c.lineTo(180, 320); c.lineTo(512, 0); c.lineTo(332, 0); c.closePath(); c.fill();
+    const ini = team.split(/\s+/).filter(Boolean).map(w => w[0]).join("").slice(0, 3).toUpperCase() || "S";
+    c.fillStyle = color === "#f3f1e8" ? "#050806" : "#f3f1e8"; c.textAlign = "center"; c.textBaseline = "middle";
+    c.font = `900 170px "Big Shoulders Display", Impact, sans-serif`; c.strokeStyle = "#050806"; c.lineWidth = 10; c.strokeText(ini, 256, 150); c.fillText(ini, 256, 150);
+    c.font = `700 30px "JetBrains Mono", monospace`; c.fillStyle = "#050806"; c.fillText(team.toUpperCase().slice(0, 22), 256, 285);
+    flagTex.needsUpdate = true;
+  }
+
+  /* players */
+  const homeMat = std(0xd4ff3a, { roughness: .55 });
+  const awayMat = std(0xdfe6df, { roughness: .6, transparent: true, opacity: .26 });
+  const skins = [0x8d5a3b, 0xa86b45, 0x6e4128].map(c => std(c, { roughness: .7 }));
+  const legMat = std(0x111511), blobMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: .38, depthWrite: false });
+  const G = { body: new THREE.CapsuleGeometry(.3, .6, 4, 12), head: new THREE.SphereGeometry(.21, 16, 12), leg: new THREE.CapsuleGeometry(.11, .48, 3, 8), blob: new THREE.CircleGeometry(.55, 20) };
+  const P = [];
+  for (let team = 0; team < 2; team++) for (let i = 0; i < 7; i++) {
+    const g = new THREE.Group(); g.rotation.order = "YXZ";
+    const body = new THREE.Mesh(G.body, team ? awayMat : homeMat); body.position.y = 1.07;
+    const head = new THREE.Mesh(G.head, skins[(i + team) % 3]); head.position.y = 1.72;
+    const pivots = [-.13, .13].map(z => { const pv = new THREE.Group(); pv.position.set(0, .72, z); const lg = new THREE.Mesh(G.leg, legMat); lg.position.y = -.33; pv.add(lg); g.add(pv); return pv; });
+    const blob = new THREE.Mesh(G.blob, blobMat); blob.rotation.x = -Math.PI / 2; blob.position.y = .03;
+    g.add(body, head, blob); g.visible = false; g.scale.setScalar(.001); scene.add(g);
+    P.push({ g, body, pivots, team, i, x: 0, z: 14, tx: 0, tz: 14, hx: 0, hz: 0, vx: 0, vz: 0, yaw: 0, on: false, s: 0, ph: Math.random() * 6, roll: 0, rollGoal: 0, party: false, fast: false });
+  }
+  const FORM = {
+    5: [[-18.4, 0], [-12, -5], [-12, 5], [-5, -3.5], [-5, 3.5]],
+    6: [[-18.4, 0], [-13, -6], [-13, 6], [-8, 0], [-4, -6], [-4, 6]],
+    7: [[-18.4, 0], [-13.5, -7], [-14, 0], [-13.5, 7], [-8, -4], [-8, 4], [-3, 0]]
+  };
+  let mode = "off", nSide = 0, kitHex = "#d4ff3a", kitPulse = 0;
+
+  /* ball */
+  const ballCv = mkCv(256, 128); { const c = ballCv.getContext("2d"); c.fillStyle = "#f6f6f0"; c.fillRect(0, 0, 256, 128); c.fillStyle = "#151515";
+    for (const [x, y] of [[20, 30], [84, 64], [148, 30], [212, 64], [52, 100], [116, 100], [180, 100], [244, 100], [116, 18], [244, 18]]) { c.beginPath(); for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2 - Math.PI / 2; c.lineTo(x + Math.cos(a) * 15, y + Math.sin(a) * 15); } c.fill(); } }
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(.21, 24, 16), std(0xffffff, { map: mkTex(ballCv), roughness: .45, emissive: 0xd4ff3a, emissiveIntensity: 0 }));
+  ball.position.set(0, .21, 0); scene.add(ball);
+  const ballBlob = new THREE.Mesh(G.blob, blobMat); ballBlob.rotation.x = -Math.PI / 2; ballBlob.scale.setScalar(.45); scene.add(ballBlob);
+  const ballGoal = new V3(0, .21, 0), ballPrev = new V3();
+  const sim = { from: new V3(), to: new V3(), t: 1, dur: 1, h: 0, holder: null, wait: 1 };
+
+  /* particles: fireworks, trails */
+  const NP = 3200, pPos = new Float32Array(NP * 3).fill(-999), pCol = new Float32Array(NP * 3), pVel = new Float32Array(NP * 3), pLife = new Float32Array(NP), pMax = new Float32Array(NP), pBase = new Float32Array(NP * 3), pDrag = new Float32Array(NP);
+  const pGeo = new THREE.BufferGeometry(); pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3)); pGeo.setAttribute("color", new THREE.BufferAttribute(pCol, 3));
+  const dotCv = mkCv(64, 64); { const c = dotCv.getContext("2d"), g = c.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, "#fff"); g.addColorStop(.3, "rgba(255,255,255,.8)"); g.addColorStop(1, "rgba(255,255,255,0)"); c.fillStyle = g; c.fillRect(0, 0, 64, 64); }
+  const pts = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: .55, map: new THREE.CanvasTexture(dotCv), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false, toneMapped: false }));
+  pts.frustumCulled = false; scene.add(pts);
+  let pCur = 0;
+  function emit(p, v, col, life, drag = .985) {
+    const i = pCur; pCur = (pCur + 1) % NP;
+    pPos.set([p.x, p.y, p.z], i * 3); pVel.set([v.x, v.y, v.z], i * 3); pBase.set([col.r, col.g, col.b], i * 3); pLife[i] = pMax[i] = life; pDrag[i] = drag;
+  }
+  const rockets = [];
+  function burst(p, col, n = 170) {
+    for (let k = 0; k < n; k++) {
+      const v = new V3(rnd(-1, 1), rnd(-1, 1), rnd(-1, 1)).normalize().multiplyScalar(rnd(7, 12));
+      const c = Math.random() < .18 ? new Col(2, 2, 2) : col.clone().multiplyScalar(2.2);
+      emit(p, v, c, rnd(1.3, 2.1), .965);
+    }
+  }
+  function launch(x, z, col) { rockets.push({ p: new V3(x, .4, z), v: new V3(rnd(-1.5, 1.5), rnd(21, 26), rnd(-1.5, 1.5)), col, fuse: rnd(.85, 1.1) }); }
+
+  /* rain */
+  const NR = 1600, rPos = new Float32Array(NR * 6);
+  for (let i = 0; i < NR; i++) { const x = rnd(-40, 40), y = rnd(0, 32), z = rnd(-30, 36); rPos.set([x, y, z, x + .08, y + .7, z], i * 6); }
+  const rGeo = new THREE.BufferGeometry(); rGeo.setAttribute("position", new THREE.BufferAttribute(rPos, 3));
+  const rain = new THREE.LineSegments(rGeo, new THREE.LineBasicMaterial({ color: 0xaac4dd, transparent: true, opacity: 0, depthWrite: false })); rain.frustumCulled = false; scene.add(rain);
+
+  /* atmosphere: continuous time-of-day sky, driven by the chosen kick-off */
+  const SKY = [
+    [0, "#02040a", "#0a1410", 0, .1, 1, 1], [300, "#050a18", "#121e28", 0, .12, .8, 1], [345, "#1c2a52", "#e0855a", .3, .32, .3, .6],
+    [420, "#3f6fb0", "#f4c08a", .9, .6, 0, .2], [600, "#2f7fd6", "#bfe0f5", 1.7, .9, 0, 0], [900, "#3a86d2", "#d6e7ef", 1.5, .85, 0, 0],
+    [1010, "#3b4f8f", "#f39a5a", .8, .55, 0, .3], [1070, "#1a1440", "#d9573a", .25, .3, .3, .7], [1130, "#060a1c", "#141d2a", 0, .13, .9, 1], [1440, "#02040a", "#0a1410", 0, .1, 1, 1]
+  ].map(([m, t, b, s, a, st, n]) => ({ m, top: new Col(t), bot: new Col(b), sun: s, amb: a, stars: st, night: n }));
+  const A = { top: new Col("#02040a"), bot: new Col("#0a1410"), sun: 0, amb: .1, stars: 1, night: 1, rain: 0, fogNear: 90, fogFar: 330, storm: 0 };
+  const AG = { ...A, top: A.top.clone(), bot: A.bot.clone() };
+  const sunDir = new V3(0, -1, 0), sunDirGoal = new V3(0, -1, 0);
+  function setAtmos(minute, wx) {
+    const m = ((minute % 1440) + 1440) % 1440;
+    let a = SKY[0], b = SKY[1];
+    for (let i = 0; i < SKY.length - 1; i++) if (m >= SKY[i].m && m <= SKY[i + 1].m) { a = SKY[i]; b = SKY[i + 1]; break; }
+    const k = (m - a.m) / ((b.m - a.m) || 1);
+    AG.top.copy(a.top).lerp(b.top, k); AG.bot.copy(a.bot).lerp(b.bot, k);
+    AG.sun = a.sun + (b.sun - a.sun) * k; AG.amb = a.amb + (b.amb - a.amb) * k; AG.stars = a.stars + (b.stars - a.stars) * k; AG.night = a.night + (b.night - a.night) * k;
+    const cl = wx?.cloud || 0;
+    if (cl) { const grey = new Col(AG.night > .5 ? "#14181c" : "#7d8790"); AG.top.lerp(grey, cl * .7); AG.bot.lerp(grey, cl * .55); AG.sun *= 1 - cl * .75; AG.stars *= 1 - cl; AG.amb *= 1 - cl * .2; }
+    AG.rain = wx?.rain || 0; AG.storm = wx?.storm || 0;
+    AG.fogNear = wx?.fog ? 15 : 90 - cl * 30; AG.fogFar = wx?.fog ? 120 : 330 - cl * 90;
+    const t = (m - 345) / (1065 - 345) * Math.PI;
+    sunDirGoal.set(-Math.cos(t) * .85, Math.sin(t), -.5).normalize();
+  }
+
+  /* floodlights */
+  let floodLevel = 0, strobe = 0, onClunk = null;
+  function setFlood(level) {
+    level = +level; if (level === floodLevel) return;
+    const up = level > floodLevel; floodLevel = level;
+    towers.forEach((t, i) => { t.goal = level; t.delay = up ? .15 + i * .24 : i * .08; t.flick = up ? .32 : 0; t.clunked = false; });
+  }
+
+  /* camera rig */
+  const CAMS = {
+    gate: { p: [0, 4.2, 40], t: [0, 3.2, 0] }, day: { p: [-22, 25, 31], t: [0, 0, 0] }, time: { p: [-17, 3.2, 9], t: [8, 7.5, -8] },
+    squad: { p: [0, 40, 15], t: [0, 0, 1] }, team: { p: [-3.5, 3, 9], t: [-11, 1.3, -1.5] }, confirm: { p: [6.6, 2.5, -2.8], t: [20, 1, .9] }
+  };
+  const cam = { p: new V3(0, 3, 70), t: new V3(0, 3, 0) }, camGoal = { p: new V3(...CAMS.gate.p), t: new V3(...CAMS.gate.t) };
+  let orbit = false, orbitA = .6, camSpeed = 1.5, shake = 0, charge = 0;
+  const view = { x: 0, y: 0 }, viewGoal = { x: 0, y: 0 };
+  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+  addEventListener("pointermove", e => { if (e.pointerType === "mouse") { mouse.tx = e.clientX / innerWidth - .5; mouse.ty = e.clientY / innerHeight - .5; } }, { passive: true });
+
+  /* player logic */
+  let SK = null;
+  function setPlayers(m, n) {
+    const live = m === "live";
+    homeMat.color.set(live ? "#d4ff3a" : kitHex);
+    awayMat.color.set(live ? "#ff5a1f" : "#dfe6df"); awayMat.opacity = live ? 1 : .26; awayMat.depthWrite = live;
+    if (m === mode && n === nSide && m !== "setpiece") return;
+    if (SK) SK = null;
+    mode = m; nSide = n;
+    const spawn = p => { if (p.s < .05) { p.x = rnd(-2, 2); p.z = CW / 2 - .5; p.vx = p.vz = 0; } };
+    P.forEach(p => { p.party = false; p.rollGoal = 0; p.fast = false; });
+    sim.holder = null; sim.t = 1; sim.wait = 1.2;
+    if (m === "off") { P.forEach(p => p.on = false); ballGoal.set(0, .21, 0); return; }
+    if (m === "live" || m === "formation") {
+      P.forEach(p => {
+        p.on = p.i < n; if (!p.on) return;
+        const f = FORM[n][p.i], sx = p.team ? -1 : 1;
+        p.hx = f[0] * sx; p.hz = f[1] * sx; p.tx = p.hx; p.tz = p.hz; spawn(p);
+      });
+      ballGoal.set(0, .21, 0);
+      return;
+    }
+    if (m === "setpiece") {
+      const edge = [];
+      P.forEach(p => {
+        p.on = p.i < n; if (!p.on) return; spawn(p);
+        if (p.team === 0 && p.i === 0) { p.tx = -18.4; p.tz = 0; }
+        else if (p.team === 0 && p.i === n - 1) { p.tx = 11.4; p.tz = -1.05; }
+        else if (p.team === 1 && p.i === 0) { p.tx = 19.6; p.tz = 0; }
+        else edge.push(p);
+      });
+      edge.forEach((p, k) => { const sgn = k % 2 ? 1 : -1, r = Math.floor(k / 2); p.tx = 9.6 + (r % 2) * 1.2; p.tz = sgn * (6.2 + r * 1.6); });
+      ballGoal.set(14, .21, 0);
+    }
+  }
+  const striker = () => P.find(p => p.team === 0 && p.i === nSide - 1);
+  const keeper = () => P.find(p => p.team === 1 && p.i === 0);
+
+  /* the strike */
+  function strike(cb) {
+    SK = { t: 0, cb, kicked: false, goal: false, orbit: false, done: false, fired: new Set(), B0: new V3(14, .21, 0), B1: new V3(20.45, 1.55, 1.85), B2: new V3(21, .22, 1.6) };
+    camSpeed = 3;
+  }
+  function raiseFlag(team, color) { flagQueue = { team, color }; flagGoal = 1.4; }
+
+  /* frame loop */
+  let last = performance.now(), clock = 0;
+  const tmpV = new V3(), white = new Col(1, 1, 1), axis = new V3();
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now; clock += dt;
+    const k1 = 1 - Math.exp(-dt * 1.4);
+
+    // atmosphere
+    A.top.lerp(AG.top, k1); A.bot.lerp(AG.bot, k1);
+    for (const key of ["sun", "amb", "stars", "night", "rain", "fogNear", "fogFar", "storm"]) A[key] += (AG[key] - A[key]) * k1;
+    sunDir.lerp(sunDirGoal, k1).normalize();
+    skyU.top.value.copy(A.top); skyU.bot.value.copy(A.bot); skyU.sunDir.value.copy(sunDir); skyU.sunAmt.value = clamp(A.sun, 0, 1.5) * (sunDir.y > -.05 ? 1 : 0);
+    scene.fog.color.copy(A.bot); scene.fog.near = A.fogNear; scene.fog.far = A.fogFar;
+    hemi.intensity = A.amb; hemi.color.copy(A.top).lerp(white, .5);
+    sun.intensity = A.sun * 2.2 * clamp(sunDir.y * 4, 0, 1); sun.position.copy(sunDir).multiplyScalar(120); sun.color.setHSL(.09, .8, .5 + clamp(sunDir.y, 0, 1) * .45);
+    moonL.intensity = A.night * .25; stars.material.opacity = A.stars; moon.material.opacity = A.night * (1 - A.storm);
+    cityMat.emissiveIntensity = A.night * .75;
+    sky.position.copy(camera.position); stars.position.copy(camera.position);
+    if (A.storm > .5 && Math.random() < dt * .25) { hemi.intensity += 6; flashDom(.25); }
+
+    // neon
+    if (neonGoal > neonAmt) { neonT += dt; neonAmt = neonT < .9 ? (Math.random() < .55 ? neonGoal : .05) : neonGoal; }
+    else neonAmt += (neonGoal - neonAmt) * k1;
+    const buzz = Math.random() < .004 ? .3 : 1;
+    neonMat.color.setScalar(neonAmt * 2.2 * buzz); neonLight.intensity = neonAmt * 30 * buzz;
+
+    // floodlights
+    let floodLvl = 0;
+    towers.forEach(t => {
+      if (t.delay > 0) t.delay -= dt;
+      else if (t.goal > t.v + .001) { if (!t.clunked) { t.clunked = true; if (t.goal > .5) onClunk?.(); } t.flick -= dt; t.v = t.flick > 0 ? (Math.random() < .5 ? t.goal : t.goal * .1) : t.goal; }
+      else if (t.goal < t.v) t.v = Math.max(t.goal, t.v - dt * 3);
+      let v = t.v, col = 0xfff3d9;
+      if (strobe > 0) { v = Math.sin(clock * 34 + t.i) > 0 ? 1.3 : .25; col = (Math.floor(clock * 8) + t.i) % 2 ? kitHex : 0xffffff; }
+      t.spot.color.set(col); t.lampMat.emissive.set(col);
+      t.spot.intensity = v * 1.5; t.lampMat.emissiveIntensity = v * 5; t.cone.material.opacity = v * .018 * (.25 + A.night * .75);
+      floodLvl += v / 4;
+    });
+    if (strobe > 0) strobe -= dt;
+    renderer.toneMappingExposure = 1.0;
+
+    // rain
+    if (A.rain > .02) {
+      for (let i = 0; i < NR; i++) { let y = rPos[i * 6 + 1] - 26 * dt; if (y < 0) y += 32; rPos[i * 6 + 1] = y; rPos[i * 6 + 4] = y + .7; }
+      rGeo.attributes.position.needsUpdate = true;
+    }
+    rain.material.opacity = A.rain * .5; rain.visible = A.rain > .02;
+
+    // kit pulse
+    homeMat.emissive.set(mode === "live" ? "#d4ff3a" : kitHex); homeMat.emissiveIntensity = kitPulse * .9; kitPulse = Math.max(0, kitPulse - dt * 1.5);
+
+    // live kickabout
+    if (mode === "live") {
+      const act = P.filter(p => p.on);
+      if (sim.t < 1) {
+        sim.t = Math.min(1, sim.t + dt / sim.dur);
+        ballGoal.lerpVectors(sim.from, sim.to, sim.t); ballGoal.y = .21 + Math.sin(Math.PI * sim.t) * sim.h;
+        ball.position.copy(ballGoal);
+      } else if (sim.holder) {
+        const h = sim.holder; ballGoal.set(h.x + Math.cos(h.yaw) * .5, .21, h.z - Math.sin(h.yaw) * .5);
+        if ((sim.wait -= dt) <= 0) {
+          const pool = act.filter(p => p !== sim.holder); const r = pool[Math.floor(Math.random() * pool.length)];
+          sim.from.copy(ball.position); sim.to.set(clamp(r.x + rnd(-2, 2), -18, 18), .21, clamp(r.z + rnd(-2, 2), -11, 11));
+          const d = sim.from.distanceTo(sim.to); sim.dur = clamp(d / 15, .45, 1.4); sim.h = d * .045; sim.t = 0; sim.holder = r; sim.wait = rnd(.6, 1.8);
+        }
+      } else if (act.length) { sim.holder = act[Math.floor(Math.random() * act.length)]; sim.wait = 1; }
+      act.forEach(p => {
+        if (p === sim.holder) { if (sim.t < 1) { p.tx = sim.to.x; p.tz = sim.to.z; } else { p.tx = clamp(p.tx + Math.sin(clock + p.ph) * dt * 3, -18, 18); p.tz = clamp(p.tz + Math.cos(clock * .8 + p.ph) * dt * 2, -11, 11); } }
+        else { p.tx = p.hx * .85 + ball.position.x * .35 + Math.sin(clock * .5 + p.ph) * 1.6; p.tz = p.hz * .8 + ball.position.z * .25 + Math.cos(clock * .4 + p.ph) * 1.4; }
+        if (p.i === 0) { p.tx = p.hx; p.tz = clamp(ball.position.z * .3, -3, 3); }
+      });
+    }
+
+    // strike sequence
+    if (SK) {
+      SK.t += dt; const t = SK.t, st = striker(), gk = keeper();
+      if (t < .72 && st) { st.tx = 13.55; st.tz = -.38; st.fast = true; }
+      if (!SK.kicked && t >= .72) { SK.kicked = true; SK.cb.onKick?.(); }
+      if (SK.kicked && !SK.goal) {
+        const k = clamp((t - .72) / .5, 0, 1), e = 1 - (1 - k) * (1 - k);
+        ball.position.lerpVectors(SK.B0, SK.B1, e); ball.position.y += Math.sin(Math.PI * k) * .7;
+        ballGoal.copy(ball.position);
+        emit(ball.position, new V3(rnd(-.3, .3), rnd(-.3, .3), rnd(-.3, .3)), new Col(kitHex).multiplyScalar(2), .45, .9);
+      }
+      if (gk && t > .74) { gk.tz = -2.1; gk.fast = true; gk.rollGoal = 1.25; }
+      if (!SK.goal && t >= 1.22) {
+        SK.goal = true; ripple = { t: 0 }; shake = .5; strobe = 1.8; kitPulse = 1; SK.cb.onGoal?.();
+        P.forEach(p => { if (p.team === 0 && p.on) { p.party = true; p.fast = true; } });
+      }
+      if (SK.goal && t < 1.8) { const k = clamp((t - 1.22) / .55, 0, 1); ball.position.lerpVectors(SK.B1, SK.B2, k * k); ballGoal.copy(ball.position); }
+      if (SK.goal && st) P.forEach(p => { if (p.party && p !== st) { p.tx = st.x - 1.2 + Math.sin(p.ph * 9) * 1.6; p.tz = st.z + Math.cos(p.ph * 9) * 1.6; } });
+      [1.3, 1.5, 1.75, 2.05, 2.35, 2.7, 3.05, 3.45, 3.9, 4.4, 5, 5.6].forEach((at, i) => {
+        if (t >= at && !SK.fired.has(i)) { SK.fired.add(i); const cols = [kitHex, "#d4ff3a", "#ffffff", kitHex, "#ff5a1f"]; launch(rnd(-14, 24), rnd(-17, -8) * (i % 3 === 0 ? -1 : 1), new Col(cols[i % cols.length])); }
+      });
+      if (!SK.orbit && t > 2.5) { SK.orbit = true; orbit = true; camSpeed = 1.1; }
+      if (!SK.done && t >= 3.4) { SK.done = true; SK.cb.onDone?.(); }
+      if (t > 7) SK = null;
+    }
+
+    // rockets & particles
+    for (let i = rockets.length - 1; i >= 0; i--) {
+      const r = rockets[i]; r.v.y -= 9 * dt; r.p.addScaledVector(r.v, dt); r.fuse -= dt;
+      emit(r.p, new V3(rnd(-.4, .4), rnd(-1, 0), rnd(-.4, .4)), new Col(1.6, 1.2, .7), .4, .9);
+      if (r.fuse <= 0) { burst(r.p, r.col); rockets.splice(i, 1); }
+    }
+    for (let i = 0; i < NP; i++) {
+      if (pLife[i] <= 0) continue;
+      pLife[i] -= dt; const o = i * 3;
+      if (pLife[i] <= 0) { pPos[o + 1] = -999; pCol[o] = pCol[o + 1] = pCol[o + 2] = 0; continue; }
+      pVel[o + 1] -= 4.2 * dt; const d = pDrag[i];
+      pVel[o] *= d; pVel[o + 1] *= d; pVel[o + 2] *= d;
+      pPos[o] += pVel[o] * dt; pPos[o + 1] += pVel[o + 1] * dt; pPos[o + 2] += pVel[o + 2] * dt;
+      const f = Math.pow(pLife[i] / pMax[i], 1.4) * (Math.random() < .08 ? .3 : 1);
+      pCol[o] = pBase[o] * f; pCol[o + 1] = pBase[o + 1] * f; pCol[o + 2] = pBase[o + 2] * f;
+    }
+    pGeo.attributes.position.needsUpdate = true; pGeo.attributes.color.needsUpdate = true;
+
+    // net ripple
+    if (ripple && backNet) {
+      ripple.t += dt; const pos = backNet.geometry.attributes.position, arr = pos.array, t = ripple.t;
+      for (let i = 0; i < arr.length; i += 3) {
+        const d = Math.hypot(backBase[i] - 1.85, backBase[i + 1] - .55);
+        arr[i + 2] = -Math.exp(-d * d / 1.1) * Math.sin(t * 16 - d * 5) * .55 * Math.exp(-t * 2.2) - Math.exp(-d * d / .6) * .35 * Math.exp(-t * .8);
+      }
+      pos.needsUpdate = true; if (t > 3) { ripple = null; for (let i = 0; i < arr.length; i++) arr[i] = backBase[i]; pos.needsUpdate = true; }
+    }
+
+    // players
+    P.forEach(p => {
+      p.s += ((p.on ? 1 : 0) - p.s) * Math.min(1, dt * 4);
+      p.g.visible = p.s > .01; if (!p.g.visible) return;
+      p.g.scale.setScalar(Math.max(.001, p.s));
+      const dx = p.tx - p.x, dz = p.tz - p.z, dd = Math.hypot(dx, dz) || 1, max = p.fast ? 7.5 : 5, sp = Math.min(max, dd * 2.2), kk = Math.min(1, dt * 5);
+      p.vx += (dx / dd * sp - p.vx) * kk; p.vz += (dz / dd * sp - p.vz) * kk;
+      p.x += p.vx * dt; p.z += p.vz * dt;
+      const speed = Math.hypot(p.vx, p.vz);
+      const want = speed > .4 ? Math.atan2(-p.vz, p.vx) : Math.atan2(-(ball.position.z - p.z), ball.position.x - p.x);
+      let dyaw = want - p.yaw; dyaw = Math.atan2(Math.sin(dyaw), Math.cos(dyaw)); p.yaw += dyaw * Math.min(1, dt * 7);
+      p.ph += dt * (2 + speed * 2.4);
+      const sw = Math.sin(p.ph) * Math.min(.95, speed * .2);
+      p.pivots[0].rotation.z = sw; p.pivots[1].rotation.z = -sw;
+      p.roll += (p.rollGoal - p.roll) * Math.min(1, dt * 6);
+      const jump = p.party ? Math.abs(Math.sin(clock * 8 + p.ph)) * .55 : 0;
+      p.body.position.y = 1.07 + Math.abs(Math.sin(p.ph)) * .05 * Math.min(1, speed / 3);
+      p.g.position.set(p.x, jump + (p.roll > .3 ? -.25 * p.roll : 0), p.z); p.g.rotation.y = p.yaw; p.g.rotation.x = p.roll;
+    });
+
+    // ball (non-scripted)
+    if (!SK && mode !== "live") ball.position.lerp(ballGoal, Math.min(1, dt * 3));
+    else if (!SK && sim.t >= 1) ball.position.lerp(ballGoal, Math.min(1, dt * 10));
+    const mv = tmpV.subVectors(ball.position, ballPrev); const dist = Math.hypot(mv.x, mv.z);
+    if (dist > 1e-4) ball.rotateOnWorldAxis(axis.set(mv.z, 0, -mv.x).normalize(), dist / .21);
+    ballPrev.copy(ball.position);
+    ballBlob.position.set(ball.position.x, .03, ball.position.z);
+    ball.material.emissive.set(kitHex); ball.material.emissiveIntensity = charge * 1.6;
+
+    // LED scroll + flag
+    ledTex.offset.x = (ledTex.offset.x + dt * .035) % 1;
+    flagH += (flagGoal - flagH) * Math.min(1, dt * 1.6);
+    if (flagQueue && Math.abs(flagH - flagGoal) < .08 && flagGoal < 2) { drawFlag(flagQueue.team, flagQueue.color); flagQueue = null; flagGoal = 8.2; }
+    flag.position.y = flagH;
+    const fa = flagG.attributes.position.array;
+    for (let i = 0; i < fa.length; i += 3) { const x = flagBase[i]; fa[i + 2] = Math.sin(clock * 4.2 - x * 2.3) * .2 * (x / 2.6); fa[i + 1] = flagBase[i + 1] + Math.sin(clock * 3 - x * 1.5) * .05 * (x / 2.6); }
+    flagG.attributes.position.needsUpdate = true; flagG.computeVertexNormals();
+
+    // camera
+    if (orbit) { orbitA += dt * .1; camGoal.p.set(Math.cos(orbitA) * 33, 14, Math.sin(orbitA) * 33 + 4); camGoal.t.set(4, 1, 0); }
+    const kc = reduced ? 1 : 1 - Math.exp(-dt * camSpeed);
+    cam.p.lerp(camGoal.p, kc); cam.t.lerp(camGoal.t, kc);
+    mouse.x += (mouse.tx - mouse.x) * .04; mouse.y += (mouse.ty - mouse.y) * .04;
+    camera.position.copy(cam.p); camera.position.x += Math.sin(clock * .23) * .35 + mouse.x * 1.6; camera.position.y += Math.sin(clock * .31) * .15 - mouse.y * .8;
+    if (shake > 0 && !reduced) { camera.position.x += rnd(-1, 1) * shake * .5; camera.position.y += rnd(-1, 1) * shake * .4; shake = Math.max(0, shake - dt * 1.1); }
+    camera.lookAt(cam.t);
+    view.x += (viewGoal.x - view.x) * Math.min(1, dt * 4); view.y += (viewGoal.y - view.y) * Math.min(1, dt * 4);
+    camera.fov = 42 - charge * 7;
+    camera.setViewOffset(innerWidth, innerHeight, -view.x, view.y, innerWidth, innerHeight);
+
+    composer.render(dt);
+    requestAnimationFrame(frame);
+  }
+
+  drawTurf(null); drawFlag("STRIKE", "#d4ff3a");
+  document.fonts?.ready.then(() => { drawNeon(); drawTurf(curLabel, curSub); drawFlag(flagState.team, flagState.color); ledKey = ""; sbKey = ""; });
+  requestAnimationFrame(frame);
+
+  return {
+    setCam(id) { if (SK?.done) SK = null; orbit = false; camSpeed = id === "gate" ? 1.1 : 1.6; const c = CAMS[id]; camGoal.p.set(...c.p); camGoal.t.set(...c.t); },
+    setView(x, y) { viewGoal.x = x; viewGoal.y = y; },
+    setAtmos, setFlood, setPlayers,
+    setKit(hex) { if (hex !== kitHex) { kitHex = hex; kitPulse = 1; if (mode !== "live") homeMat.color.set(hex); } },
+    setTurf(label, sub) { if (label === curLabel && sub === curSub) return; curLabel = label; curSub = sub; drawTurf(label, sub); },
+    setLED: drawLED, setBoard: drawBoard,
+    setNeon(v) { neonGoal = v; },
+    setCharge(v) { charge = v; },
+    strike, raiseFlag,
+    setFlag(team, color) { drawFlag(team, color); },
+    onClunk(fn) { onClunk = fn; }
+  };
+}
+
+/* =====================================================================
+   THE FRONT DESK (UI)
+   ===================================================================== */
+const STEPS = [
+  { id: "gate", label: "Gate" }, { id: "day", label: "Day" }, { id: "time", label: "Kick-off" },
+  { id: "squad", label: "Squad" }, { id: "team", label: "Team" }, { id: "confirm", label: "Strike" }
+];
+const profile = store.get("strike-profile", {});
+const S = { step: 0, day: null, slot: null, squad: null, team: profile.team || "", kit: profile.kit || KITS[0].c, name: profile.name || "", phone: profile.phone || "", busy: false };
+let W = null;
+
+const valid = id => ({
+  gate: true,
+  day: S.day != null && openCount(DAYS[S.day]) > 0,
+  time: S.day != null && S.slot != null && statusOf(DAYS[S.day], SLOTS[S.slot]).s === "open",
+  squad: !!S.squad,
+  team: S.team.trim().length >= 2,
+  confirm: true
+}[id]);
+const reachable = i => STEPS.slice(0, i).every(s => valid(s.id));
+
+/* ---- rail ---- */
+function renderRail() {
+  const rail = $("#rail");
+  $$(".rn", rail).forEach(n => n.remove());
+  const vals = ["", S.day != null ? dayName(DAYS[S.day]) : "", S.slot != null ? fmt24(SLOTS[S.slot].ko) : "", S.squad ? `${S.squad}v${S.squad}` : "", S.team || "", ""];
+  STEPS.forEach((s, i) => {
+    const b = document.createElement("button");
+    b.className = "rn" + (i < S.step ? " done" : "") + (i === S.step ? " cur" : "");
+    b.disabled = S.busy || !reachable(i) || i === S.step;
+    b.innerHTML = `<span class="d"></span><span class="l">${s.label}</span><span class="v">${esc(vals[i])}</span>`;
+    b.setAttribute("aria-label", `${s.label}${vals[i] ? ": " + vals[i] : ""}`);
+    if (i === S.step) b.setAttribute("aria-current", "step");
+    b.onclick = () => go(i);
+    rail.appendChild(b);
+  });
+  const p = S.step / (STEPS.length - 1);
+  $("#railFill").style.transform = `scaleX(${p})`;
+  $("#railBall").style.left = `${p * 100}%`;
+  $("#curL").textContent = S.step ? `${S.step}/5 · ${STEPS[S.step].label}` : "";
+}
+
+/* ---- desk views ---- */
+const head = (n, q, bn, hint) => `<p class="q-n mono">Step ${n} of 5</p><h2 class="q">${q}</h2><p class="q-bn bn">${bn}</p><p class="hint">${hint}</p>`;
+const FORM_UI = { 5: [[-18.4, 0], [-12, -5], [-12, 5], [-5, -3.5], [-5, 3.5]], 6: [[-18.4, 0], [-13, -6], [-13, 6], [-8, 0], [-4, -6], [-4, 6]], 7: [[-18.4, 0], [-13.5, -7], [-14, 0], [-13.5, 7], [-8, -4], [-8, 4], [-3, 0]] };
+const VIEWS = {
+  day() {
+    return head(1, "Which day<br>are we playing?", "কোন দিন খেলবে?", "I'll paint it on the pitch. <b>Orange dot</b> = weekend rate. Forecasts are live.") +
+      `<div class="dates" role="listbox" aria-label="Dates">${DAYS.map(d => {
+        const open = openCount(d), w = wxDay(d.key), lbl = d.i === 0 ? "TODAY" : d.i === 1 ? "TMRW" : DOW[d.dow];
+        return `<button class="dt${S.day === d.i ? " sel" : ""}" role="option" aria-selected="${S.day === d.i}" data-d="${d.i}" ${open ? "" : "disabled"} aria-label="${dayName(d)}, ${open} slots open${w ? ", " + w.label + " " + w.temp + "°" : ""}">
+          ${isWeekend(d) ? '<span class="wk"></span>' : ""}<span class="w">${lbl}</span><b>${d.d}</b><span class="m">${MON[d.m]}</span>
+          <span class="x">${w ? wxIcon(w.kind) + w.temp + "°" : ""}</span><span class="bar"><i style="width:${open / SLOTS.length * 100}%"></i></span></button>`;
+      }).join("")}</div>`;
+  },
+  time() {
+    const d = DAYS[S.day];
+    return head(2, "Pick your<br>kick-off.", "কখন কিক-অফ?", "Every slot is 90 minutes. Watch the sky — <b>night slots switch the floodlights on</b>.") +
+      CONFIG.tiers.map(t => {
+        const list = SLOTS.filter(s => s.tier === t); if (!list.length) return "";
+        return `<div class="tg"><div class="tg-h mono"><i style="background:${t.color}"></i><span>${t.name}${t.id === "prime" ? " · Floodlit" : ""}</span><span>${money(priceFor(d, list[0]))}</span></div>
+          <div class="tcs">${list.map(s => { const st = statusOf(d, s); return `<button class="tc ${st.s}${S.slot === s.i ? " sel" : ""}" data-i="${s.i}" ${st.s === "open" ? "" : 'aria-disabled="true"'} aria-label="${fmt12(s.ko)}, ${st.label}"><b>${fmt24(s.ko)}</b><span>${st.s === "open" ? "→ " + fmt24(s.ft) : st.label}</span></button>`; }).join("")}</div></div>`;
+      }).join("") + `<div class="fc" id="fc">${fcHtml()}</div>`;
+  },
+  squad() {
+    return head(3, "How many<br>a side?", "কয়জন করে খেলবে?", "Your squad runs out onto the pitch. The see-through team is whoever you're playing.") +
+      `<div class="sqs">${CONFIG.squads.map(n => `<button class="sq${S.squad === n ? " sel" : ""}" data-n="${n}" aria-pressed="${S.squad === n}">${miniPitch(n)}<div><b>${n}v${n}</b><span>${n * 2} players · ${n === 5 ? "Fast and tight" : n === 6 ? "The sweet spot" : "Full tactics"}</span></div></button>`).join("")}</div>`;
+  },
+  team() {
+    return head(4, "Name your<br>team.", "তোমার দলের নাম কী?", "It goes up on the LED boards and the scoreboard. Your kit colour dresses the squad.") +
+      `<div class="f big"><label class="mono" for="iTeam">Team name</label><input id="iTeam" maxlength="18" autocomplete="off" placeholder="Rupsha Rovers" value="${esc(S.team)}">
+        <button class="dice" id="dice" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>Suggest a name</button></div>
+      <div class="f"><span class="mono">Kit colour</span><div class="kits" role="radiogroup" aria-label="Kit colour">${KITS.map(k => `<button class="kit${S.kit === k.c ? " sel" : ""}" role="radio" aria-checked="${S.kit === k.c}" data-c="${k.c}" style="--c:${k.c}"><i></i>${k.n}</button>`).join("")}</div></div>`;
+  },
+  confirm() {
+    const d = DAYS[S.day], s = SLOTS[S.slot], total = priceFor(d, s), adv = Math.round(total * CONFIG.advancePercent / 100);
+    return head(5, "Step up.<br>Take the shot.", "শেষ ধাপ — গোল দিয়ে বুক করো।", "Leave your details, then <b>press and hold</b> the button to take the penalty that books your slot.") +
+      `<div class="ledger">
+        <div><span>Date</span><b>${dayName(d)}</b></div>
+        <div><span>Kick-off</span><b>${fmt12(s.ko)} → ${fmt12(s.ft)}</b></div>
+        <div><span>Squad</span><b>${S.squad}v${S.squad} · ${s.tier.name}</b></div>
+        <div><span>Team</span><b style="color:${S.kit}">${esc(S.team)}</b></div>
+        <div class="tot"><span>Total</span><b>${money(total)}</b></div>
+        <div class="adv"><span>Advance to confirm (${CONFIG.advancePercent}%)</span><b>${money(adv)}</b></div>
+      </div>
+      <div class="f mid" id="fName"><label class="mono" for="iName">Captain's name</label><input id="iName" autocomplete="name" placeholder="e.g. Rafi Ahmed" value="${esc(S.name)}"><span class="err"></span></div>
+      <div class="f mid" id="fPhone"><label class="mono" for="iPhone">Mobile (bKash / WhatsApp)</label><input id="iPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXX-XXXXXX" value="${esc(S.phone)}"><span class="err"></span></div>
+      <p class="fine">You'll get a match pass and a WhatsApp message to send us. The slot is yours once the advance arrives.</p>`;
+  }
+};
+function fcHtml() {
+  if (S.slot == null) return `${wxIcon("na")}<span>Pick a slot to see the kick-off forecast.</span>`;
+  const d = DAYS[S.day], s = SLOTS[S.slot], w = wxAt(d.key, s.ko), night = isNightMin(s.ko + 45);
+  if (!w) return `${wxIcon("sun", night)}<span><b>${fmt12(s.ko)}</b> · forecast not available yet for this slot.</span>`;
+  const tip = w.storm ? "Storm risk — we'll call you if play is unsafe." : w.rain > .3 ? "Wet turf — bring a towel." : w.temp >= 32 ? "Hot one — we'll have cold water ready." : night || s.ko >= 1000 ? "Floodlights on. Perfect." : "Good football weather.";
+  return `${wxIcon(w.kind, night)}<span>Kick-off forecast: <b>${w.temp}° · ${w.label}${w.prob != null ? ` · ${w.prob}% rain` : ""}</b><br>${tip}</span>`;
+}
+function miniPitch(n) {
+  const X = x => 4 + (x + 20) / 40 * 112, Y = z => 4 + (z + 12.5) / 25 * 68, F = FORM_UI[n];
+  return `<svg viewBox="0 0 120 76" aria-hidden="true"><rect x="4" y="4" width="112" height="68" rx="3" fill="#174d2a" stroke="rgba(255,255,255,.5)"/><path d="M60 4v68" stroke="rgba(255,255,255,.5)"/><circle cx="60" cy="38" r="8" fill="none" stroke="rgba(255,255,255,.5)"/>
+    ${F.map(([x, z]) => `<circle cx="${X(-x)}" cy="${Y(-z)}" r="3" fill="rgba(255,255,255,.35)"/>`).join("")}${F.map(([x, z]) => `<circle cx="${X(x)}" cy="${Y(z)}" r="3.6" fill="${S.kit}"/>`).join("")}</svg>`;
+}
+
+/* ---- render a step ---- */
+function render() {
+  const id = STEPS[S.step].id, body = $("#deskB");
+  document.documentElement.style.setProperty("--kit", S.kit);
+  $("#gate").classList.toggle("hidden", id !== "gate");
+  $("#desk").classList.toggle("hidden", id === "gate");
+  document.body.classList.toggle("desk-on", id !== "gate");
+  if (id === "gate") { updateGate(); typeGreeting(); }
+  else {
+    body.innerHTML = VIEWS[id](); body.classList.remove("in"); void body.offsetWidth; body.classList.add("in"); body.scrollTop = 0;
+    $("#deskC").textContent = `Counter ${pad(S.step)}`; $("#deskS").textContent = `${S.step} / 5`;
+    BIND[id]?.();
+    const nx = $("#next");
+    nx.hidden = id === "confirm"; $("#hold").hidden = id !== "confirm"; Hold.reset();
+    nx.innerHTML = ({ day: "Choose kick-off", time: "Pick your squad", squad: "Name your team", team: "Final step" }[id] || "Next") + ' <span class="arr">→</span>';
+    updateNext();
+  }
+  renderRail(); applyWorld(); updateView(); setTimeout(updateView, 850);
+}
+function updateNext() { const id = STEPS[S.step].id; $("#next").disabled = !valid(id); renderRail(); }
+function go(i) {
+  if (S.busy || i === S.step || i < 0 || i >= STEPS.length) return;
+  if (i > S.step && !reachable(i)) return;
+  if (S.step === 0 && i > 0) Snd.play("swoosh");
+  S.step = i; Snd.play("tick"); render();
+  if (i > 0 && !isMobile()) setTimeout(() => $("#deskB button:not(:disabled), #deskB input")?.focus({ preventScroll: true }), 350);
+}
+
+const BIND = {
+  day() {
+    $("#deskB .dates").addEventListener("click", e => {
+      const b = e.target.closest(".dt"); if (!b || b.disabled) return;
+      S.day = +b.dataset.d;
+      if (S.slot != null && statusOf(DAYS[S.day], SLOTS[S.slot]).s !== "open") S.slot = null;
+      $$(".dt").forEach(x => { const on = x === b; x.classList.toggle("sel", on); x.setAttribute("aria-selected", on); });
+      Snd.play("tick"); updateNext(); applyWorld();
+    });
+  },
+  time() {
+    $("#deskB").addEventListener("click", e => {
+      const b = e.target.closest(".tc"); if (!b || !b.classList.contains("open")) return;
+      S.slot = +b.dataset.i;
+      $$(".tc").forEach(x => x.classList.toggle("sel", x === b));
+      $("#fc").innerHTML = fcHtml();
+      Snd.play("tick"); updateNext(); applyWorld();
+    });
+  },
+  squad() {
+    $("#deskB .sqs").addEventListener("click", e => {
+      const b = e.target.closest(".sq"); if (!b) return;
+      S.squad = +b.dataset.n;
+      $$(".sq").forEach(x => { const on = x === b; x.classList.toggle("sel", on); x.setAttribute("aria-pressed", on); });
+      Snd.play("tick"); updateNext(); applyWorld();
+    });
+  },
+  team() {
+    const inp = $("#iTeam");
+    inp.addEventListener("input", () => { S.team = inp.value; updateNext(); applyWorld(); });
+    $("#dice").onclick = () => { const pool = TEAM_IDEAS.filter(t => t !== S.team); S.team = pool[Math.floor(Math.random() * pool.length)]; inp.value = S.team; Snd.play("tick"); updateNext(); applyWorld(); };
+    $(".kits").addEventListener("click", e => {
+      const b = e.target.closest(".kit"); if (!b) return;
+      S.kit = b.dataset.c;
+      $$(".kit").forEach(x => { const on = x === b; x.classList.toggle("sel", on); x.setAttribute("aria-checked", on); });
+      document.documentElement.style.setProperty("--kit", S.kit);
+      Snd.play("tick"); applyWorld();
+    });
+  },
+  confirm() {
+    $("#iName").addEventListener("input", e => { S.name = e.target.value; e.target.closest(".f").classList.remove("bad"); });
+    $("#iPhone").addEventListener("input", e => { S.phone = e.target.value; e.target.closest(".f").classList.remove("bad"); });
+  }
+};
+
+/* ---- hold-to-strike ---- */
+const normPhone = v => { let d = v.replace(/\D/g, ""); if (d.startsWith("880")) d = "0" + d.slice(3); return /^01[3-9]\d{8}$/.test(d) ? d : null; };
+function checkForm() {
+  let ok = true;
+  const bad = (id, msg) => { const f = $(id); f.classList.add("bad"); $(".err", f).textContent = msg; ok = false; };
+  $$("#deskB .err").forEach(e => e.textContent = "");
+  if (S.name.trim().length < 2) bad("#fName", "Who's the captain?");
+  if (!normPhone(S.phone)) bad("#fPhone", "Enter a valid BD mobile, e.g. 017XXXXXXXX");
+  if (!ok) $("#deskB .bad input")?.focus();
+  return ok;
+}
+const Hold = (() => {
+  const btn = $("#hold");
+  let p = 0, holding = false, raf = 0, lastT = 0, fired = false;
+  const lbl = $("#holdL");
+  const loop = t => {
+    const dt = Math.min(.25, (t - lastT) / 1000); lastT = t;
+    p = holding ? p + dt / 1.15 : Math.max(0, p - dt * 2.5);
+    btn.style.setProperty("--p", Math.min(1, p)); W?.setCharge(Math.min(1, p));
+    lbl.textContent = p >= 1 ? "STRIKE!" : holding ? (p > .6 ? "Almost…" : "Keep holding…") : "Hold to strike";
+    if (p >= 1 && !fired) { fired = true; holding = false; raf = 0; W?.setCharge(0); fire(); return; }
+    if (holding || p > 0) raf = requestAnimationFrame(loop); else raf = 0;
+  };
+  const start = e => {
+    if (fired || holding) return;
+    if (!checkForm()) { btn.classList.remove("shake"); void btn.offsetWidth; btn.classList.add("shake"); return; }
+    holding = true; lastT = performance.now(); if (!raf) raf = requestAnimationFrame(loop);
+    if (e.pointerId != null) btn.setPointerCapture?.(e.pointerId);
+  };
+  const stop = () => { if (holding && p < 1) toast("Hold it until the bar fills — that's your shot."); holding = false; };
+  btn.addEventListener("pointerdown", e => { e.preventDefault(); start(e); });
+  btn.addEventListener("pointerup", stop); btn.addEventListener("pointercancel", stop);
+  btn.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && !e.repeat) { e.preventDefault(); start(e); } });
+  btn.addEventListener("keyup", e => { if (e.key === " " || e.key === "Enter") stop(); });
+  btn.addEventListener("contextmenu", e => e.preventDefault());
+  return { reset() { p = 0; holding = false; fired = false; btn.style.setProperty("--p", 0); lbl.textContent = "Hold to strike"; W?.setCharge(0); } };
+})();
+
+/* ---- booking + the strike ---- */
+function fire() {
+  const d = DAYS[S.day], s = SLOTS[S.slot];
+  if (statusOf(d, s).s !== "open") { toast("Someone just grabbed that slot — pick another."); S.slot = null; go(2); return; }
+  const total = priceFor(d, s), adv = Math.round(total * CONFIG.advancePercent / 100);
+  const b = { id: "STR-" + Math.random().toString(36).slice(2, 6).toUpperCase() + pad(s.i + 1), day: d.key, slot: s.i, squad: S.squad, team: S.team.trim(), kit: S.kit, name: S.name.trim(), phone: normPhone(S.phone), total, adv, at: Date.now() };
+  bookings.push(b); store.set("strike-bookings", bookings);
+  store.set("strike-profile", { team: b.team, kit: b.kit, name: b.name, phone: S.phone });
+  S.busy = true; renderRail();
+  $("#desk").classList.add("hidden"); document.body.classList.remove("desk-on");
+  W?.setView(0, 0);
+  Snd.play("whistle");
+  const goal = () => {
+    Snd.play("roar"); flashDom(.85);
+    const sl = $("#slam"); sl.classList.remove("go"); void sl.offsetWidth; sl.classList.add("go");
+    W?.setBoard({ tag: "BOOKED", tagColor: b.kit, accent: b.kit, big: "GOAL!", l1: b.team.toUpperCase(), l2: `${b.id} · ${DOW[d.dow]} ${fmt24(s.ko)}` });
+    W?.setLED(`GOAL!!! ${b.team.toUpperCase()} ARE BOOKED IN · ${DOW[d.dow]} ${d.d} ${MON[d.m]} · ${fmt24(s.ko)} · SEE YOU UNDER THE LIGHTS · `, b.kit);
+    if (navigator.vibrate) navigator.vibrate([60, 40, 120]);
+  };
+  if (W) W.strike({ onKick: () => Snd.play("kick"), onGoal: goal, onDone: () => showPass(b) });
+  else { setTimeout(goal, 700); setTimeout(() => showPass(b), 2400); }
+}
+function barcode(id) {
+  let x = 0, bars = "";
+  [...(id + id + id)].forEach((ch, i) => { const c = ch.charCodeAt(0); for (let k = 0; k < 3; k++) { const w = 1 + ((c >> k) & 3); if ((i + k) % 2 === 0) bars += `<rect x="${x}" width="${w}" height="54"/>`; x += w; } });
+  return `<svg viewBox="0 0 ${x} 54" preserveAspectRatio="none" fill="#050806" aria-hidden="true">${bars}</svg>`;
+}
+function showPass(b) {
+  const d = DAYS.find(x => x.key === b.day), s = SLOTS[b.slot];
+  W?.raiseFlag(b.team, b.kit);
+  $("#pass").innerHTML = `
+    <div class="ps-top"><b>STRIKE</b><span class="mono">Match pass</span></div>
+    <div class="ps-team" style="--kit:${b.kit}"><i></i><b>${esc(b.team)}</b></div>
+    <div class="ps-grid">
+      <div><small>DATE</small><b>${DOW[d.dow]} ${d.d} ${MON[d.m]}</b></div><div><small>KICK-OFF</small><b>${fmt24(s.ko)}</b></div><div><small>FULL TIME</small><b>${fmt24(s.ft)}</b></div>
+      <div><small>SQUAD</small><b>${b.squad}v${b.squad}</b></div><div><small>SESSION</small><b>${s.tier.name}</b></div><div><small>TOTAL</small><b>${money(b.total)}</b></div>
+    </div>
+    <div class="ps-cap mono">Captain ${esc(b.name)} · ${b.phone.slice(0, 5)}•••${b.phone.slice(-3)}<br>JoyBangla Mor, Khulna · arrive 10 min early</div>
+    <div class="ps-bar">${barcode(b.id)}</div>
+    <div class="ps-id"><b>${b.id}</b><span class="mono">Admit one squad</span></div>
+    <span class="ps-stamp">Pending advance</span>`;
+  const wa = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(`Assalamu alaikum STRIKE! I'd like to confirm my booking:\n\nBooking ID: ${b.id}\nDate: ${dayName(d)} (${b.day})\nTime: ${fmt12(s.ko)} – ${fmt12(s.ft)}\nSquad: ${b.squad}v${b.squad}\nTeam: ${b.team}\nCaptain: ${b.name}\nMobile: ${b.phone}\nTotal: ${money(b.total)} (advance ${money(b.adv)})`)}`;
+  $("#rcAct").innerHTML = `
+    <a class="btn btn-k wide" href="${wa}" target="_blank" rel="noopener" style="--kit:${b.kit}">Send on WhatsApp to confirm <span class="arr">↗</span></a>
+    <button class="btn btn-g" id="rcCal">Add to calendar</button><button class="btn btn-g" id="rcAgain">Book another</button>
+    <button class="btn btn-g wide" id="rcGate">Back to the gate</button>
+    <p class="rc-note">Pay the ${money(b.adv)} advance via bKash / Nagad to lock it in. Your flag is now flying at the gate.</p>`;
+  const rc = $("#rc"); rc.hidden = false;
+  const pass = $("#pass"); pass.classList.remove("print"); void pass.offsetWidth; pass.classList.add("print");
+  $("#printer").classList.remove("idle"); Snd.play("print");
+  setTimeout(() => { $("#printer").classList.add("idle"); $("#rcAct").classList.add("on"); $("#rcAct a").focus({ preventScroll: true }); }, reduced ? 50 : 2400);
+  $("#rcCal").onclick = () => ics(b);
+  const close = step => { rc.hidden = true; $("#rcAct").classList.remove("on"); S.busy = false; S.slot = null; if (step === 0) { S.day = null; S.squad = null; } S.step = step; render(); };
+  $("#rcAgain").onclick = () => close(1);
+  $("#rcGate").onclick = () => close(0);
+}
+function ics(b) {
+  const [y, m, d] = b.day.split("-").map(Number), s = SLOTS[b.slot];
+  const u = mins => new Date(Date.UTC(y, m - 1, d, 0, mins - KHL)).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const txt = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//STRIKE Turf//Booking//EN", "BEGIN:VEVENT", `UID:${b.id}@strike-turf`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`,
+    `DTSTART:${u(s.ko)}`, `DTEND:${u(s.ft)}`, `SUMMARY:STRIKE · ${b.team} (${b.squad}v${b.squad})`, "LOCATION:STRIKE Turf\\, JoyBangla Mor\\, Khulna", `GEO:${CONFIG.lat.toFixed(6)};${CONFIG.lng.toFixed(6)}`,
+    `DESCRIPTION:Booking ${b.id}. Arrive 10 minutes early.`, "BEGIN:VALARM", "TRIGGER:-PT2H", "ACTION:DISPLAY", "DESCRIPTION:Match in 2 hours", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt], { type: "text/calendar" })); a.download = `${b.id}.ics`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ---- world sync: every selection lands on the turf ---- */
+function applyWorld() {
+  if (!W || S.busy) return;
+  const id = STEPS[S.step].id, live = liveNow();
+  if (id === "gate") {
+    const w = wxNow();
+    W.setAtmos(live.m, w); W.setFlood(!live.open ? .22 : (live.m >= 1000 || live.m < 400) ? 1 : 0);
+    W.setPlayers(live.inPlay ? "live" : "off", 7);
+    W.setTurf(null, null); W.setCam("gate");
+    const mine = upcomingMine();
+    W.setLED(`STRIKE · JOYBANGLA MOR · KHULNA · ${live.inPlay ? `IN PLAY ${live.minute}'` : live.open ? "PITCH OPEN" : "OPENS " + fmt24(OPEN)} · ${mine ? `NEXT UP: ${mine.team.toUpperCase()}` : "YOUR 90 STARTS HERE"} · `, "#d4ff3a");
+    W.setBoard({ tag: "● LIVE", accent: "#d4ff3a", big: live.inPlay ? `IN PLAY ${live.minute}'` : live.open ? "PITCH FREE" : "CLOSED", l1: live.next ? `NEXT KICK-OFF ${live.next.d.i === 0 ? "TODAY" : DOW[live.next.d.dow]} ${fmt24(live.next.s.ko)}` : "FULLY BOOKED", l2: w ? `${w.temp}°C · ${w.label.toUpperCase()} · KHULNA` : "JOYBANGLA MOR · KHULNA" });
+    return;
+  }
+  const d = S.day != null ? DAYS[S.day] : null, s = S.slot != null ? SLOTS[S.slot] : null;
+  const minute = s ? s.ko + 45 : live.m;
+  const wx = d ? (s ? wxAt(d.key, s.ko) : wxDay(d.key)) : wxNow();
+  W.setAtmos(minute, wx);
+  W.setFlood((s ? (s.ko + 45 >= 1000 || s.ko < 400) : (live.m >= 1000 || live.m < 400)) ? 1 : 0);
+  W.setKit(S.kit);
+  if (id === "confirm" && S.squad) W.setPlayers("setpiece", S.squad);
+  else if (S.squad) W.setPlayers("formation", S.squad);
+  else W.setPlayers("off", 0);
+  W.setTurf(d ? `${DOW[d.dow]} ${d.d} ${MON[d.m]}` : null, s ? fmt24(s.ko) : null);
+  const team = S.team.trim().toUpperCase();
+  W.setLED(`${team || "YOUR TEAM"} · ${d ? `${DOW[d.dow]} ${d.d} ${MON[d.m]}` : "PICK A DAY"} · ${s ? "KICK-OFF " + fmt24(s.ko) : "PICK A KICK-OFF"} · ${S.squad ? S.squad + "-A-SIDE" : "PICK A SQUAD"} · STRIKE · `, S.kit);
+  W.setBoard({ tag: "BOOKING", tagColor: S.kit, accent: S.kit, big: team || "YOUR TEAM", l1: `${d ? `${DOW[d.dow]} ${d.d} ${MON[d.m]}` : "DATE —"} · ${s ? "KO " + fmt24(s.ko) : "KO —"}`, l2: `${S.squad ? `${S.squad}V${S.squad}` : "SQUAD —"} · ${s ? s.tier.name.toUpperCase() : "—"}${wx ? ` · ${wx.temp}°C` : ""}` });
+  W.setCam(id);
+}
+function updateView() {
+  if (!W) return;
+  if (S.busy) { W.setView(0, 0); return; }
+  if (STEPS[S.step].id === "gate") { W.setView(isMobile() ? 0 : innerWidth * .2, isMobile() ? innerHeight * .16 : 0); return; }
+  const r = $("#desk").getBoundingClientRect();
+  if (isMobile()) W.setView(0, (innerHeight - r.top) / 2 * .85);
+  else W.setView((r.right + 10) / 2, 0);
+}
+addEventListener("resize", updateView);
+
+/* ---- gate: live status ---- */
+let typing = 0;
+function typeGreeting() {
+  const el = $("#greet"), mine = upcomingMine();
+  const text = mine ? `Welcome back, ${mine.team}! Your flag's still flying at the gate. Want to book another 90?`
+    : bookings.length ? "Welcome back to STRIKE. Lights, nets, ball — all ready. Tell me when you want to play."
+    : "Assalamu alaikum! Welcome to STRIKE. Pick a day, a kick-off and your squad — I'll set the pitch up while you watch.";
+  clearInterval(typing); el.classList.remove("done");
+  if (reduced) { el.textContent = text; el.classList.add("done"); return; }
+  let i = 0; el.textContent = "";
+  typing = setInterval(() => { el.textContent = text.slice(0, ++i); if (i >= text.length) { clearInterval(typing); el.classList.add("done"); } }, 22);
+}
+function updateGate() {
+  const live = liveNow(), w = wxNow();
+  $("#nStatus").textContent = live.inPlay ? `In play ${live.minute}'` : live.open ? "Pitch free" : "Closed";
+  $("#nStatusS").textContent = live.inPlay ? `${fmt24(live.slot.ko)}–${fmt24(live.slot.ft)} · floodlights ${live.m >= 1000 ? "on" : "off"}` : live.open ? "Walk in, it's yours" : `Opens ${fmt24(OPEN)}`;
+  $("#nWx").textContent = w ? `${w.temp}°` : "—";
+  $("#nWxS").textContent = w ? `${w.label} · wind ${w.wind} km/h` : "Live weather";
+  $("#nLeft").textContent = live.left;
+  $("#nNext").textContent = live.next ? fmt24(live.next.s.ko) : "Full";
+  $("#nNextS").textContent = live.next ? `Next open · ${dayName(live.next.d)}` : "Fully booked";
+  const mine = upcomingMine(), mc = $("#mineCard");
+  if (mine) {
+    const d = DAYS.find(x => x.key === mine.day), s = SLOTS[mine.slot];
+    const mins = (d ? d.i * 1440 : 0) + s.ko - nowMin(), h = Math.max(0, Math.floor(mins / 60)), dd = Math.floor(h / 24);
+    mc.hidden = false; mc.style.setProperty("--kit", mine.kit);
+    mc.innerHTML = `<span class="mono" style="color:${mine.kit}">Your next match · ${mine.id}</span><div><b style="color:${mine.kit}">${esc(mine.team)}</b><span>${d ? dayName(d) : mine.day} · ${fmt12(s.ko)}</span></div><div><b>${mins <= 0 ? "Live" : dd ? `${dd}d ${h % 24}h` : `${h}h ${Math.floor(mins % 60)}m`}</b><span>to kick-off</span></div>`;
+  } else mc.hidden = true;
+}
+
+/* ---- ticker ---- */
+function tickerItems() {
+  const live = liveNow(), w = wxNow(), mine = upcomingMine(), tm = DAYS[1] ? openCount(DAYS[1]) : 0;
+  return [
+    `<b>STRIKE</b> · JoyBangla Mor, Khulna`,
+    `Khulna <b class="tClock">--:--</b>`,
+    w ? `Weather <b>${w.temp}°C · ${w.label}</b> · wind ${w.wind} km/h` : `Weather loading`,
+    live.inPlay ? `Pitch <b>in play ${live.minute}'</b> (${fmt24(live.slot.ko)}–${fmt24(live.slot.ft)})` : live.open ? `Pitch <b>free right now</b>` : `Pitch <b>closed</b> · opens ${fmt24(OPEN)}`,
+    live.next ? `Next open kick-off <b>${dayName(live.next.d)} ${fmt24(live.next.s.ko)}</b>` : `Fully booked`,
+    `Slots left today <b>${live.left}</b> · tomorrow <b>${tm}</b>`,
+    mine ? `<b style="color:${mine.kit}">${esc(mine.team)}</b> kick off ${dayName(DAYS.find(x => x.key === mine.day) || DAYS[0])} at <b>${fmt24(SLOTS[mine.slot].ko)}</b>` : `Floodlit nights <b>${CONFIG.tiers.at(-1).from}–00:00</b>`,
+    `Prime from <b>${money(CONFIG.tiers.at(-1).price)}</b> / 90 min`
+  ];
+}
+function renderTicker() { const h = tickerItems().map(x => `<span>${x}</span>`).join(""); $("#tTrack").innerHTML = h + h; tickClock(); }
+function tickClock() {
+  const d = khl(), t = `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+  $("#clock").textContent = t; $$(".tClock").forEach(e => e.textContent = t.slice(0, 5));
+  const w = wxNow(); $("#wxChip").textContent = w ? ` · ${w.temp}° ${w.label}` : "";
+}
+
+/* ---- drawer ---- */
+function drawerHtml(tab) {
+  if (tab === "rates") return `<h3>Rates</h3><p class="bn">৯০ মিনিটের দাম</p>
+    ${CONFIG.tiers.map(t => `<div class="rate"><i style="background:${t.color}"></i><div><b>${t.name}${t.id === "prime" ? " · Floodlit" : ""}</b><span>${t.from} – ${t.to === "24:00" ? "00:00" : t.to}</span></div><strong>${money(t.price)}</strong></div>`).join("")}
+    <p class="hint" style="margin-top:14px">Fri &amp; Sat +${money(CONFIG.weekendSurcharge)}. ${CONFIG.advancePercent}% advance confirms the booking, the rest is paid at the ground. Balls and bibs included.</p>`;
+  if (tab === "find") {
+    const { lat, lng } = CONFIG;
+    return `<h3>Find us</h3><p class="bn">জয় বাংলা মোড়, খুলনা</p>
+      <div class="coords">${lat.toFixed(4)}°N · ${lng.toFixed(4)}°E</div><p class="hint">JoyBangla Mor, Khulna, Bangladesh. Look for the green neon sign above the gate.</p>
+      <div class="map"><iframe title="Map of STRIKE at JoyBangla Mor" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=${lng - .006},${lat - .004},${lng + .006},${lat + .004}&layer=mapnik"></iframe><span class="pin"></span></div>
+      <div class="contact"><a class="btn btn-k" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}">Get directions <span class="arr">↗</span></a>
+      <a class="btn btn-g" href="tel:${CONFIG.phone.replace(/[^\d+]/g, "")}">Call ${CONFIG.phone}</a><a class="btn btn-g" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.whatsapp}">WhatsApp us</a></div>`;
+  }
+  const faq = [
+    ["How do I confirm?", `Take your shot, then send the pre-filled WhatsApp message and pay the ${CONFIG.advancePercent}% advance via bKash or Nagad. We confirm right away.`],
+    ["Can I cancel?", "Cancel 24+ hours before kick-off for a full refund of the advance. Later than that, you can reschedule once."],
+    ["What if it rains?", "Light rain, we play — the turf drains fast. In a thunderstorm we stop play and reschedule you for free."],
+    ["Tournaments?", "Leagues, office tournaments and school events — message us on WhatsApp for multi-slot packages."]
+  ];
+  return `<h3>House rules</h3><p class="bn">মাঠের নিয়ম</p>
+    <div class="rules">${["Turf shoes or flat soles — no metal studs", "Arrive 10 minutes before kick-off", "Clear the pitch on time for the next squad", "No smoking inside the cage", "Respect the ref, the turf and each other"].map((r, i) => `<div><b>${pad(i + 1)}</b>${r}</div>`).join("")}</div>
+    ${faq.map(([q, a], i) => `<details${i ? "" : " open"}><summary>${q}</summary><p>${a}</p></details>`).join("")}`;
+}
+let lastFocus = null;
+function openDrawer(tab) {
+  if (!$("#drawer").classList.contains("on")) lastFocus = document.activeElement;
+  $("#drB").innerHTML = drawerHtml(tab);
+  $$(".dr-h .tab").forEach(t => t.setAttribute("aria-selected", t.dataset.tab === tab));
+  $("#drawer").classList.add("on"); $("#scrim").classList.add("on"); $("#drawer").setAttribute("aria-hidden", "false");
+  setTimeout(() => $(`.dr-h .tab[data-tab="${tab}"]`).focus(), 100);
+}
+function closeDrawer() { $("#drawer").classList.remove("on"); $("#scrim").classList.remove("on"); $("#drawer").setAttribute("aria-hidden", "true"); lastFocus?.focus?.(); }
+
+/* ---- misc ---- */
+let toastT = 0;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2600); }
+function flashDom(a) { if (reduced) return; const f = $("#flash"); f.style.transition = "none"; f.style.opacity = a; void f.offsetWidth; f.style.transition = "opacity .9s ease-out"; f.style.opacity = 0; }
+const sndIcon = on => on ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>`;
+
+/* ---- events ---- */
+$("#walk").onclick = () => go(1);
+$("#home").onclick = e => { e.preventDefault(); if (!S.busy) go(0); };
+$("#back").onclick = () => go(S.step - 1);
+$("#next").onclick = () => { if (valid(STEPS[S.step].id)) go(S.step + 1); };
+$("#snd").innerHTML = sndIcon(false);
+$("#snd").onclick = () => { const on = Snd.toggle(); $("#snd").innerHTML = sndIcon(on); $("#snd").setAttribute("aria-pressed", on); toast(on ? "Sound on — listen for the floodlights." : "Sound off"); };
+$("#info").onclick = () => openDrawer("rates");
+$$("[data-drawer]").forEach(b => b.onclick = () => openDrawer(b.dataset.drawer));
+$$(".dr-h .tab").forEach(t => t.onclick = () => openDrawer(t.dataset.tab));
+$("#drX").onclick = closeDrawer; $("#scrim").onclick = closeDrawer;
+addEventListener("keydown", e => {
+  if (e.key === "Escape") { if ($("#drawer").classList.contains("on")) closeDrawer(); return; }
+  if (e.key === "Enter" && !S.busy && !$("#drawer").classList.contains("on") && $("#rc").hidden) {
+    const id = STEPS[S.step].id, tgt = e.target;
+    if (id === "confirm" || tgt.tagName === "BUTTON" || tgt.tagName === "A") return;
+    if (id === "gate") go(1); else if (valid(id)) go(S.step + 1);
+  }
+});
+
+/* ---- boot ---- */
+renderTicker(); render();
+setInterval(tickClock, 1000);
+let lastMin = -1;
+setInterval(() => {
+  const m = Math.floor(nowMin()); if (m === lastMin) return; lastMin = m;
+  const fresh = buildDays();
+  if (fresh[0].key !== DAYS[0].key) { DAYS = fresh; S.day = null; S.slot = null; if (S.step > 1 && !S.busy) { S.step = 1; render(); } }
+  renderTicker(); if (S.step === 0) { updateGate(); applyWorld(); }
+}, 4000);
+loadWeather().then(() => { renderTicker(); if (S.step === 0) updateGate(); else if (S.step <= 2 && !S.busy) render(); applyWorld(); });
+setInterval(() => loadWeather().then(() => { renderTicker(); applyWorld(); }), 15 * 60 * 1000);
+
+const bootFallback = setTimeout(() => $("#boot").classList.add("gone"), 8000);
+try {
+  const THREE = await import("three");
+  const [ec, rp, ub, op] = await Promise.all([
+    import("three/addons/postprocessing/EffectComposer.js"), import("three/addons/postprocessing/RenderPass.js"),
+    import("three/addons/postprocessing/UnrealBloomPass.js"), import("three/addons/postprocessing/OutputPass.js")
+  ]);
+  W = createWorld(THREE, { EffectComposer: ec.EffectComposer, RenderPass: rp.RenderPass, UnrealBloomPass: ub.UnrealBloomPass, OutputPass: op.OutputPass });
+} catch (e) { console.warn("3D turf unavailable:", e); }
+if (!W) document.body.classList.add("no-gl");
+else {
+  W.onClunk(() => Snd.play("clunk"));
+  const mine = upcomingMine(); if (mine) W.setFlag(mine.team, mine.kit);
+  setTimeout(() => W.setNeon(1), 500);
+  applyWorld(); updateView();
+  document.fonts?.ready.then(() => applyWorld());
+}
+clearTimeout(bootFallback);
+setTimeout(() => $("#boot").classList.add("gone"), W ? 350 : 0);
+</script>
+</body>
+</html>
